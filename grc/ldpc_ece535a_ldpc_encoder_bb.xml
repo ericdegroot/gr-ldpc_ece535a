@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<block>
+  <name>ldpc_encoder_bb</name>
+  <key>ldpc_ece535a_ldpc_encoder_bb</key>
+  <category>ldpc_ece535a</category>
+  <import>import ldpc_ece535a</import>
+  <make>ldpc_ece535a.ldpc_encoder_bb()</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <!-- No params yet
+  <param>
+    <name>...</name>
+    <key>...</key>
+    <type>...</type>
+  </param>
+  -->
+
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>byte</type>
+  </source>
+</block>
