@@ -32,13 +32,13 @@ class qa_ldpc_decoder_bb (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        x = [ 0, 1, 0, 1, 0, 1 ]
-        y_expected = [ 0, 1, 0, 1, 0, 1 ]
+        x = [ 112, 80, 93, 120, 20, 50 ]
+        y_expected = [ 112, 80, 93, 120, 20, 50 ]
 
         # set up fg
-        x_src = gr.vector_source_f(x, False)
+        x_src = blocks.vector_source_b(x, False)
         ldpc_decoder = ldpc_ece535a.ldpc_decoder_bb()
-        y_dst = gr.vector_sink_f()
+        y_dst = blocks.vector_sink_b()
 
         self.tb.connect((x_src, 0), (ldpc_decoder, 0))
         self.tb.connect((ldpc_decoder, 0), (y_dst, 0))
@@ -46,7 +46,7 @@ class qa_ldpc_decoder_bb (gr_unittest.TestCase):
         self.tb.run ()
 
         # check data
-        y = dst.data()
+        y = y_dst.data()
         self.assertFloatTuplesAlmostEqual(y_expected, y, 6)
 
 
