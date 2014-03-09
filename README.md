@@ -1,3 +1,20 @@
+Installation
+============
+
+From your desired local workspace directory:
+
+git clone https://github.com/ericdegroot/gr-ldpc_ece535a.git
+
+mkdir build
+
+cd build
+
+cmake -Wno-dev ../
+
+make
+
+sudo make install
+
 Components
 ==========
 
