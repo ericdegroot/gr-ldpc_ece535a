@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+#
+# ECE 535A project
+#
+# This application simply creates random keyboard characters, passes each character
+# through the LDPC encoder and decoder, and then prints the output to the screen.
+#
+# For now this is just to make sure things are working...
+#
+
+from gnuradio import blocks
+from gnuradio import gr
+import ldpc_ece535a
+import numpy
+import sys
+
+class dump_sink(gr.sync_block):
+    """A simple GNU Radio sink block that takes input bytes and prints them to the screen"""
+
+    def __init__(self):
+        gr.sync_block.__init__(self, name = "Dump Sink", in_sig = [numpy.uint8], out_sig = None)
+
+    def work(self, input_items, output_items):
+        # Loop through the input and write each byte to console as ASCII character
+        for i in input_items[0]:
+            sys.stdout.write(chr(i))
+
+        # Tell GNU Radio no output was produced (this block is a sink)
+        return 0
+
+
+class top_block(gr.top_block):
+    """The 'top' block that assembles and encapsulates this application's GNU Radio flow graph"""
+
+    def __init__(self):
+        gr.top_block.__init__(self, name = "LDPC Dump")
+
+        # Variables
+        self.samp_rate = samp_rate = 1000
+
+        # Blocks
+        self.ldpc_ece535a_ldpc_encoder_bb_0 = ldpc_ece535a.ldpc_encoder_bb()
+        self.ldpc_ece535a_ldpc_decoder_bb_0 = ldpc_ece535a.ldpc_decoder_bb()
+        self.dump_sink_0 = dump_sink()
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_char*1, samp_rate,True)
+        self.analog_random_source_x_0 = blocks.vector_source_b(map(int, numpy.random.randint(32, 127, samp_rate)), True)
+
+        # Connections
+        self.connect((self.ldpc_ece535a_ldpc_encoder_bb_0, 0), (self.ldpc_ece535a_ldpc_decoder_bb_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.ldpc_ece535a_ldpc_encoder_bb_0, 0))
+        self.connect((self.analog_random_source_x_0, 0), (self.blocks_throttle_0, 0))
+        self.connect((self.ldpc_ece535a_ldpc_decoder_bb_0, 0), (self.dump_sink_0, 0))
+
+
+if __name__ == '__main__':
+    # Create instance of top_block
+    tb = top_block()
+
+    # Start flow graph and wait for completion (or Ctrl-C)
+    tb.start()
+    tb.wait()
