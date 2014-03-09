@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>ldpc_decoder_bb</name>
+  <name>LDPC Decoder (ECE 535A)</name>
   <key>ldpc_ece535a_ldpc_decoder_bb</key>
   <category>ldpc_ece535a</category>
   <import>import ldpc_ece535a</import>
