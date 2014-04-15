@@ -23,3 +23,9 @@ GR_PYTHON_INSTALL(
     PROGRAMS
     DESTINATION bin
 )
+
+add_executable(ldpc_umfpack
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldpc_umfpack.cpp
+)
+
+target_link_libraries(ldpc_umfpack umfpack amd)
