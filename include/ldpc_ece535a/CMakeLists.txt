@@ -23,5 +23,5 @@
 install(FILES
     api.h
     ldpc_encoder_bb.h
-    ldpc_decoder_bb.h DESTINATION include/ldpc_ece535a
+    ldpc_decoder_cb.h DESTINATION include/ldpc_ece535a
 )
