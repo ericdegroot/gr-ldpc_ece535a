@@ -37,7 +37,7 @@ if(NOT ldpc_ece535a_sources)
 endif(NOT ldpc_ece535a_sources)
 
 add_library(gnuradio-ldpc_ece535a SHARED ${ldpc_ece535a_sources})
-target_link_libraries(gnuradio-ldpc_ece535a ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES})
+target_link_libraries(gnuradio-ldpc_ece535a ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} umfpack amd)
 set_target_properties(gnuradio-ldpc_ece535a PROPERTIES DEFINE_SYMBOL "gnuradio_ldpc_ece535a_EXPORTS")
 
 if(APPLE)

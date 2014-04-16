@@ -23,13 +23,28 @@
 
 #include <ldpc_ece535a/ldpc_encoder_bb.h>
 
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#include <suitesparse/umfpack.h>
+
 namespace gr {
   namespace ldpc_ece535a {
+
+    using namespace boost::numeric;
 
     class ldpc_encoder_bb_impl : public ldpc_encoder_bb
     {
      private:
-      // Nothing to declare in this block.
+      ublas::matrix<int> d_H;
+
+      ublas::vector<int> solve(const ublas::matrix<int> &A,
+                               const ublas::vector<int> &B);
+      ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource,
+                                         ublas::matrix<int> &H);
+
+      ublas::vector<int> mod2(const ublas::vector<int> &u);
+      int sign(double val);
 
      public:
       ldpc_encoder_bb_impl();
