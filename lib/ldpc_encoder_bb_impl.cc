@@ -33,7 +33,9 @@ namespace gr {
 		  gr::io_signature::make(1, 1, sizeof(unsigned char))),
         d_H(8, 16)
     {
-      // makeLdpc(8, 16, 1, 1, 3)
+      // M = 8
+      // N = 16
+      // makeLdpc(M, N, 1, 1, 3)
       const int h_data[] = {
         1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,
         0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,
@@ -78,9 +80,6 @@ namespace gr {
       int input_available = ninput_items[0];
       int input_consumed = 0;
 
-      std::cout << "input_available=" << input_available << std::endl;
-      std::cout << "min_input_required=" << min_input_required << std::endl;
-
       while (input_available >= min_input_required) {
         ublas::vector<int> data(d_H.size1());
 
@@ -88,17 +87,15 @@ namespace gr {
         for (int i = 0; i < min_input_required; i++) {
           for (int j = 0; j < 8; j++) {
             int b = *(in + i) & (1 << (7 - j));
-
-            data(i * 8 + j) = b;
+            data(i * 8 + j) = b == 0 ? 0 : 1;
           }
-
-          std::cout << "in=" << (int)*(in + i) << std::endl;
         }
 
         // Encode message
         ublas::matrix<int> newH(d_H);
         const ublas::vector<int> c = makeParityCheck(data, newH);
 
+        // Write check bytes to output
         for (int i = 0; i < min_input_required; i++) {
           for (int j = 0; j < 8; j++) {
             if (c(i * 8 + j) == 1) {
@@ -109,8 +106,11 @@ namespace gr {
           out++;
         }
 
+        // Write data bytes to output
         for (int i = 0; i < min_input_required; i++) {
-          *(out + i) = *in;
+          *out = *in;
+
+          out++;
           in++;
         }
 
@@ -118,14 +118,12 @@ namespace gr {
         input_consumed += min_input_required;
       }
 
-      std::cout << "input_consumed=" << input_consumed << std::endl;
-
       // Tell runtime system how many input items we consumed on
       // each input stream.
       consume_each(input_consumed);
 
       // Tell runtime system how many output items we produced.
-      return input_consumed * 2;
+      return input_consumed * 2; // code rate 1/2
     }
 
     ublas::vector<int>
