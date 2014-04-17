@@ -3,4 +3,4 @@
 *~
 *.pyc
 build
-examples/top_block.py
+examples/*.py

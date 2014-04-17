@@ -85,6 +85,7 @@ namespace gr {
 
         // Populate data vector
         for (int i = 0; i < min_input_required; i++) {
+          // Get data bits from current input byte
           for (int j = 0; j < 8; j++) {
             int b = *(in + i) & (1 << (7 - j));
             data(i * 8 + j) = b == 0 ? 0 : 1;
@@ -97,6 +98,7 @@ namespace gr {
 
         // Write check bytes to output
         for (int i = 0; i < min_input_required; i++) {
+          // Write check bits to current output byte
           for (int j = 0; j < 8; j++) {
             if (c(i * 8 + j) == 1) {
               *out |= 1 << (7 - j);
