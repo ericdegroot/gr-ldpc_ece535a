@@ -32,22 +32,57 @@ class qa_ldpc_encoder_bb (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        x = [ 112, 80, 93, 120, 20, 50 ]
-        y_expected = [ 112, 80, 93, 120, 20, 50 ]
+#>>> data  = ( 0b11101101, 0b00000010, 0b00110100, 0b10000000 )
+#>>> check = ( 0b10110100, 0b10101001, 0b11010101, 0b10001000 )
+#>>> print data
+#(237, 2, 52, 128)
+#>>> print check
+#(180, 169, 213, 136)
+
+        check = ( 0b10110100, 0b10101001, 0b11010101, 0b10001000 )
+        data  = ( 0b11101101, 0b00000010, 0b00110100, 0b10000000 )
+
+        print check
+        print data
+
+        expected = tuple()
+        for pair in zip(check, data):
+            expected += pair
+
+        print expected
+
+#check =
+#     0     1     0     1     0     0     0     0
+#data =
+#     0     1     0     1     0     0     1     1
+#check =
+#     0     1     0     1     1     0     0     1
+#data =
+#     0     0     0     0     0     1     1     0
+#check =
+#     1     0     0     1     0     0     0     0
+#data =
+#     0     0     1     1     0     0     0     1
+#check =
+#     1     1     1     1     0     0     0     1
+#data =
+#     1     1     1     0     1     0     0     0
 
         # set up fg
-        x_src = blocks.vector_source_b(x, False)
+        src = blocks.vector_source_b(data, False)
         ldpc_encoder = ldpc_ece535a.ldpc_encoder_bb()
-        y_dst = blocks.vector_sink_b()
+        dst = blocks.vector_sink_b()
 
-        self.tb.connect((x_src, 0), (ldpc_encoder, 0))
-        self.tb.connect((ldpc_encoder, 0), (y_dst, 0))
+        self.tb.connect((src, 0), (ldpc_encoder, 0))
+        self.tb.connect((ldpc_encoder, 0), (dst, 0))
 
         self.tb.run ()
 
         # check data
-        y = y_dst.data()
-        self.assertFloatTuplesAlmostEqual(y_expected, y, 6)
+        result = dst.data()
+        #print expected
+        #print result
+        self.assertTupleEqual(expected, result)
 
 
 if __name__ == '__main__':

@@ -31,15 +31,18 @@ namespace gr {
       : gr::block("ldpc_encoder_bb",
 		  gr::io_signature::make(1, 1, sizeof(unsigned char)),
 		  gr::io_signature::make(1, 1, sizeof(unsigned char))),
-        d_H(5, 10)
+        d_H(8, 16)
     {
-      // FIXME: H matrix M dimension needs to be multiple of 8
+      // makeLdpc(8, 16, 1, 1, 3)
       const int h_data[] = {
-        1, 0, 1, 0, 1, 0, 0, 0, 1, 0,
-        0, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-        0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
-        0, 0, 1, 0, 0, 1, 0, 0, 0, 1,
-        0, 0, 0, 0, 0, 1, 1, 1, 1, 0
+        1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,
+        0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,
+        0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,
+        0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,
+        0,0,0,0,0,1,0,1,0,1,0,0,0,0,1,0,
+        0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,
+        0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,
+        0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1
       };
 
       for (unsigned int i = 0; i < d_H.size1(); i++) {
@@ -75,35 +78,47 @@ namespace gr {
       int input_available = ninput_items[0];
       int input_consumed = 0;
 
+      std::cout << "input_available=" << input_available << std::endl;
+      std::cout << "min_input_required=" << min_input_required << std::endl;
+
       while (input_available >= min_input_required) {
         ublas::vector<int> data(d_H.size1());
 
         // Populate data vector
         for (int i = 0; i < min_input_required; i++) {
           for (int j = 0; j < 8; j++) {
-            int b = *in & (1 << (7 - j));
+            int b = *(in + i) & (1 << (7 - j));
 
             data(i * 8 + j) = b;
           }
+
+          std::cout << "in=" << (int)*(in + i) << std::endl;
         }
 
         // Encode message
         ublas::matrix<int> newH(d_H);
         const ublas::vector<int> c = makeParityCheck(data, newH);
 
-        for (unsigned int i = 0; i < c.size(); i++) {
-          *out = c(i);
+        for (int i = 0; i < min_input_required; i++) {
+          for (int j = 0; j < 8; j++) {
+            if (c(i * 8 + j) == 1) {
+              *out |= 1 << (7 - j);
+            }
+          }
+
           out++;
         }
 
-        for (unsigned int i = 0; i < data.size(); i++) {
-          *out = data(i);
-          out++;
+        for (int i = 0; i < min_input_required; i++) {
+          *(out + i) = *in;
+          in++;
         }
 
         input_available -= min_input_required;
         input_consumed += min_input_required;
       }
+
+      std::cout << "input_consumed=" << input_consumed << std::endl;
 
       // Tell runtime system how many input items we consumed on
       // each input stream.
