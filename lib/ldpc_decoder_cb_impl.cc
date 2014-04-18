@@ -94,20 +94,23 @@ namespace gr {
           in++;
         }
 
+        /*
         std::cout << "tx=[";
         for (int i = 0; i < tx.size(); i++)
           std::cout << tx(i) << ",";
         std::cout << "]" << std::endl;
+        */
 
         input_available -= d_H.size2();
 
         ublas::vector<int> vhat = decodeBitFlipping(tx, d_H, d_iterations);
 
+        /*
         std::cout << "vhat=[";
         for (int i = 0; i < vhat.size(); i++)
           std::cout << vhat(i) << ",";
         std::cout << "]" << std::endl;
-
+        */
 
         int numBytes = vhat.size() / 8;
         for (int i = 0; i < numBytes; i++) {
@@ -164,7 +167,7 @@ namespace gr {
 
       // Iteration
       for (unsigned int n = 0; n < iterations; n++) {
-        std::cout << "Iteration : " << n << std::endl;
+        // std::cout << "Iteration : " << n << std::endl;
 
         // Horizontal step
         for (unsigned int i = 0; i < M; i++) {

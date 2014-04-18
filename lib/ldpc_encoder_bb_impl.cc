@@ -176,6 +176,10 @@ namespace gr {
         std::cerr << "umfpack_di_triplet_to_col(): ERROR" << std::endl;
       }
 
+      delete[] Ti;
+      delete[] Tj;
+      delete[] Tx;
+
       void *symbolic;
       status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &symbolic, NULL, NULL);
       if (status != UMFPACK_OK) {
@@ -198,10 +202,17 @@ namespace gr {
 
       umfpack_di_free_numeric(&numeric);
 
+      delete[] b;
+      delete[] Ap;
+      delete[] Ai;
+      delete[] Ax;
+
       ublas::vector<int> x_vec(n);
       for (int i = 0; i < n; i++) {
         x_vec(i) = x[i];
       }
+
+      delete[] x;
 
       return x_vec;
     }

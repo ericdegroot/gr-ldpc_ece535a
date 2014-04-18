@@ -117,25 +117,23 @@ ublas::vector<int> solve(const ublas::matrix<int> &A, const ublas::vector<int> &
   int status = umfpack_di_triplet_to_col(n, n, nz, Ti, Tj, Tx, Ap, Ai, Ax, NULL);
   if (status != UMFPACK_OK) {
     std::cerr << "umfpack_di_triplet_to_col(): ERROR" << std::endl;
-  }/* else {
-    std::cout << "umfpack_di_triplet_to_col(): OK" << std::endl;
-    }*/
+  }
+
+  delete[] Ti;
+  delete[] Tj;
+  delete[] Tx;
 
   void *symbolic;
   status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &symbolic, NULL, NULL);
   if (status != UMFPACK_OK) {
     std::cerr << "umfpack_di_symbolic(): ERROR" << std::endl;
-  }/* else {
-    std::cout << "umfpack_di_symbolic(): OK" << std::endl;
-    }*/
+  }
 
   void *numeric;
   status = umfpack_di_numeric(Ap, Ai, Ax, symbolic, &numeric, NULL, NULL);
   if (status != UMFPACK_OK) {
     std::cerr << "umfpack_di_numeric(): ERROR" << std::endl;
-  }/* else {
-    std::cout << "umfpack_di_numeric(): OK" << std::endl;
-    }*/
+  }
 
   umfpack_di_free_symbolic(&symbolic);
 
@@ -143,16 +141,21 @@ ublas::vector<int> solve(const ublas::matrix<int> &A, const ublas::vector<int> &
   status = umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, numeric, NULL, NULL);
   if (status != UMFPACK_OK) {
     std::cerr << "umfpack_di_solve(): ERROR" << std::endl;
-  }/* else {
-    std::cout << "umfpack_di_solve(): OK" << std::endl;
-    }*/
+  }
 
   umfpack_di_free_numeric(&numeric);
+
+  delete[] b;
+  delete[] Ap;
+  delete[] Ai;
+  delete[] Ax;
 
   ublas::vector<int> x_vec(n);
   for (int i = 0; i < n; i++) {
     x_vec(i) = x[i];
   }
+
+  delete[] x;
 
   return x_vec;
 }
