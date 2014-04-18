@@ -8,8 +8,9 @@
 #include "config.h"
 #endif
 
-#include <gnuradio/io_signature.h>
 #include "ldpc_encoder_bb_impl.h"
+
+#include <gnuradio/io_signature.h>
 
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -129,7 +130,9 @@ namespace gr {
     }
 
     ublas::vector<int>
-    ldpc_encoder_bb_impl::solve(const ublas::matrix<int> &A, const ublas::vector<int> &B) {
+    ldpc_encoder_bb_impl::solve(const ublas::matrix<int> &A,
+                                const ublas::vector<int> &B)
+    {
       const int n = A.size1();
 
       // Count non-zero entries
@@ -204,7 +207,9 @@ namespace gr {
     }
 
     ublas::vector<int>
-    ldpc_encoder_bb_impl::makeParityCheck(const ublas::vector<int> &dSource, ublas::matrix<int> &H) {
+    ldpc_encoder_bb_impl::makeParityCheck(const ublas::vector<int> &dSource,
+                                          ublas::matrix<int> &H)
+    {
       // Get matrix dimensions
       const unsigned int M = H.size1();
       const unsigned int N = H.size2();
@@ -266,7 +271,8 @@ namespace gr {
     }
 
     ublas::vector<int>
-    ldpc_encoder_bb_impl::mod2(const ublas::vector<int> &u) {
+    ldpc_encoder_bb_impl::mod2(const ublas::vector<int> &u)
+    {
       ublas::vector<int> v(u.size());
 
       for (unsigned int i = 0; i < u.size(); i++) {
@@ -279,11 +285,6 @@ namespace gr {
       }
 
       return v;
-    }
-
-    int
-    ldpc_encoder_bb_impl::sign(double val) {
-      return (val > 0) - (val < 0);
     }
 
   } /* namespace ldpc_ece535a */

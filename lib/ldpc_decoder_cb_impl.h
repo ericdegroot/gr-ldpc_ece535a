@@ -11,13 +11,29 @@
 
 #include <gnuradio/digital/constellation.h>
 
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#include <suitesparse/umfpack.h>
+
 namespace gr {
   namespace ldpc_ece535a {
+
+    using namespace boost::numeric;
 
     class ldpc_decoder_cb_impl : public ldpc_decoder_cb
     {
      private:
       digital::constellation_sptr d_constellation;
+      ublas::matrix<int> d_H;
+      unsigned int d_iterations;
+
+      ublas::vector<int>
+      decodeBitFlipping(const ublas::vector<double> &rx,
+                        const ublas::matrix<int> &H,
+                        const unsigned int iterations);
+
+      int sign(double val);
 
      public:
       ldpc_decoder_cb_impl();

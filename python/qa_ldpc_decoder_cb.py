@@ -17,22 +17,50 @@ class qa_ldpc_decoder_cb (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        x = [ 112, 80, 93, 120, 20, 50 ]
-        y_expected = [ 112, 80, 93, 120, 20, 50 ]
+        mod_data  = ( ( 1, 1, 1, -1, 1, 1, -1, 1 ),
+                      ( -1, -1, -1, -1, -1, -1, 1, -1 ),
+                      ( -1, -1, 1, 1, -1, 1, -1, -1 ),
+                      ( 1, -1, -1, -1, -1, -1, -1, -1 ),
+                      ( -1, 1, -1, 1, -1, -1, 1, 1 ),
+                      ( -1, -1, -1, -1, -1, 1, 1, -1 ),
+                      ( -1, -1, 1, 1, -1, -1, -1, 1 ),
+                      ( 1, 1, 1, -1, 1, -1, -1, -1 ) )
+
+        mod_check = ( ( 1, -1, 1, 1, -1, 1, -1, -1 ),
+                      ( 1, -1, 1, -1, 1, -1, -1, 1 ),
+                      ( 1, 1, -1, 1, -1, 1, -1, 1 ),
+                      ( 1, -1, -1, -1, 1, -1, -1, -1 ),
+                      ( -1, 1, -1, 1, -1, -1, -1, -1 ),
+                      ( -1, 1, -1, 1, 1, -1, -1, 1 ),
+                      ( 1, -1, -1, 1, -1, -1, -1, -1 ),
+                      ( 1, 1, 1, 1, -1, -1, -1, 1 ) )
+
+        mod_frames = tuple()
+        for pair in zip(mod_check, mod_data):
+            for item in pair:
+                mod_frames += item
+
+        expected_data  = ( 0b11101101, 0b00000010, 0b00110100, 0b10000000, 0b01010011, 0b00000110, 0b00110001, 0b11101000 )
+        expected_check = ( 0b10110100, 0b10101001, 0b11010101, 0b10001000, 0b01010000, 0b01011001, 0b10010000, 0b11110001 )
+
+        # expected result is alternating check,data,check,data,... bytes
+        expected_frames = tuple()
+        for pair in zip(expected_check, expected_data):
+            expected_frames += pair
 
         # set up fg
-        x_src = blocks.vector_source_c(x, False)
+        src = blocks.vector_source_c(mod_frames, False)
         ldpc_decoder = ldpc_ece535a.ldpc_decoder_cb()
-        y_dst = blocks.vector_sink_b()
+        dst = blocks.vector_sink_b()
 
-        self.tb.connect((x_src, 0), (ldpc_decoder, 0))
-        self.tb.connect((ldpc_decoder, 0), (y_dst, 0))
+        self.tb.connect((src, 0), (ldpc_decoder, 0))
+        self.tb.connect((ldpc_decoder, 0), (dst, 0))
 
         self.tb.run ()
 
         # check data
-        y = y_dst.data()
-        self.assertFloatTuplesAlmostEqual(y_expected, y, 6)
+        result = dst.data()
+        self.assertTupleEqual(expected_frames, result)
 
 
 if __name__ == '__main__':

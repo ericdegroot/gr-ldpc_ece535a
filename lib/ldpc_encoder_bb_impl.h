@@ -44,7 +44,6 @@ namespace gr {
                                          ublas::matrix<int> &H);
 
       ublas::vector<int> mod2(const ublas::vector<int> &u);
-      int sign(double val);
 
      public:
       ldpc_encoder_bb_impl();

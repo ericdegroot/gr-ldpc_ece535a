@@ -399,12 +399,25 @@ const int hData2[] = {
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0
 };
 
+const int M3 = 8;
+const int N3 = 16;
+const int hData3[] = {
+  1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,
+  0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,
+  0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,
+  0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,
+  0,0,0,0,0,1,0,1,0,1,0,0,0,0,1,0,
+  0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,
+  0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,
+  0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1
+};
+
 int main() {
   boost::random::mt19937 gen;
   gen.seed(static_cast<unsigned int>(std::time(0)));
 
-  const unsigned int M = M2;
-  const unsigned int N = N2;
+  const unsigned int M = M3;
+  const unsigned int N = N3;
 
   const unsigned int iterations = 5;
   const unsigned int frames = 30;
@@ -414,7 +427,7 @@ int main() {
 
   ublas::matrix<int> H(M, N);
 
-  initMatrix<int>(H, hData2);
+  initMatrix<int>(H, hData3);
 
   boost::random::uniform_int_distribution<> uniformDistribution(0, 1);
   boost::random::normal_distribution<> normalDistribution;
@@ -472,13 +485,13 @@ int main() {
         tx(k) += std::sqrt(N0) * normalDistribution(gen);
       }
 
-      //std::cout << "tx=" << std::endl;
-      //printVector<double>(tx);
+      std::cout << "tx=" << std::endl;
+      printVector<double>(tx);
 
       ublas::vector<int> vhat1 = decodeBitFlipping(tx, H, iterations); // newH
 
-      //std::cout << "vhat1=" << std::endl;
-      //printVector<int>(vhat1);
+      std::cout << "vhat1=" << std::endl;
+      printVector<int>(vhat1);
 
       double rat1 = biterr(vhat1, u);
       //std::cout << "rat1=" << rat1 << std::endl;
