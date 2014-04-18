@@ -9,13 +9,15 @@
 
 #include <ldpc_ece535a/ldpc_decoder_cb.h>
 
+#include <gnuradio/digital/constellation.h>
+
 namespace gr {
   namespace ldpc_ece535a {
 
     class ldpc_decoder_cb_impl : public ldpc_decoder_cb
     {
      private:
-      // Nothing to declare in this block.
+      digital::constellation_sptr d_constellation;
 
      public:
       ldpc_decoder_cb_impl();

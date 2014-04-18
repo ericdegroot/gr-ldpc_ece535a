@@ -8,8 +8,9 @@
 #include "config.h"
 #endif
 
-#include <gnuradio/io_signature.h>
 #include "ldpc_decoder_cb_impl.h"
+
+#include <gnuradio/io_signature.h>
 
 namespace gr {
   namespace ldpc_ece535a {
@@ -27,7 +28,8 @@ namespace gr {
     ldpc_decoder_cb_impl::ldpc_decoder_cb_impl()
       : gr::block("ldpc_decoder_cb",
 		  gr::io_signature::make(1, 1, sizeof(gr_complex)),
-		  gr::io_signature::make(1, 1, sizeof(unsigned char)))
+                  gr::io_signature::make(1, 1, sizeof(unsigned char))),
+        d_constellation(digital::constellation_bpsk::make())
     {}
 
     /*
@@ -52,8 +54,9 @@ namespace gr {
       const gr_complex *in = (const gr_complex *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
 
-      // Just copy input to output for now...
-      std::memcpy(out, in, noutput_items * sizeof(unsigned char));
+      for (int i = 0; i < noutput_items; i++) {
+        out[i] = d_constellation->decision_maker(&in[i]);
+      }
 
       // Tell runtime system how many input items we consumed on
       // each input stream.
