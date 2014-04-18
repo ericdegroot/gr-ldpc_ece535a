@@ -19,6 +19,7 @@ class qa_ldpc_encoder_bb (gr_unittest.TestCase):
 
     def test_001_t (self):
         # data and check bits generated in MATLAB
+        # (237, 2, 52, 128, 83, 6, 49, 232)
         data  = ( 0b11101101, 0b00000010, 0b00110100, 0b10000000, 0b01010011, 0b00000110, 0b00110001, 0b11101000 )
         check = ( 0b10110100, 0b10101001, 0b11010101, 0b10001000, 0b01010000, 0b01011001, 0b10010000, 0b11110001 )
 

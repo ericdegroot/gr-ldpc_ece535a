@@ -52,14 +52,8 @@ namespace gr {
       const gr_complex *in = (const gr_complex *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
 
-      // Do <+signal processing+>
-      /*
-      std::cout << "in[]=";
-      for (int i = 0; i < noutput_items; i++) {
-        std::cout << ((in[i].real() > 0.0) ? 1 : 0) << ", ";
-      }
-      std::cout << std::endl;
-      */
+      // Just copy input to output for now...
+      std::memcpy(out, in, noutput_items * sizeof(unsigned char));
 
       // Tell runtime system how many input items we consumed on
       // each input stream.
