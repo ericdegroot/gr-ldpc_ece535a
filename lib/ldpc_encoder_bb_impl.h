@@ -36,12 +36,22 @@ namespace gr {
     class ldpc_encoder_bb_impl : public ldpc_encoder_bb
     {
      private:
+      unsigned int d_M;
+      unsigned int d_N;
+
       ublas::matrix<int> d_H;
+      ublas::matrix<int> d_L;
+      ublas::matrix<int> d_U;
 
       ublas::vector<int> solve(const ublas::matrix<int> &A,
                                const ublas::vector<int> &B);
+      void reorderHMatrix(ublas::matrix<int> &H,
+                          ublas::matrix<int> &L,
+                          ublas::matrix<int> &U);
       ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource,
-                                         ublas::matrix<int> &H);
+                                         const ublas::matrix<int> &H,
+                                         const ublas::matrix<int> &L,
+                                         const ublas::matrix<int> &U);
 
       ublas::vector<int> mod2(const ublas::vector<int> &u);
 

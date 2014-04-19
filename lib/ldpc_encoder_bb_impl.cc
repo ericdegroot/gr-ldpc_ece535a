@@ -32,7 +32,9 @@ namespace gr {
       : gr::block("ldpc_encoder_bb",
 		  gr::io_signature::make(1, 1, sizeof(unsigned char)),
 		  gr::io_signature::make(1, 1, sizeof(unsigned char))),
-        d_H(8, 16)
+        d_M(8), d_N(16), d_H(d_M, d_N),
+        d_L(ublas::zero_matrix<int>(d_M, d_N - d_M)),
+        d_U(ublas::zero_matrix<int>(d_M, d_N - d_M))
     {
       // M = 8
       // N = 16
@@ -48,11 +50,13 @@ namespace gr {
         0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1
       };
 
-      for (unsigned int i = 0; i < d_H.size1(); i++) {
-        for (unsigned int j = 0; j < d_H.size2(); j++) {
-          d_H(i, j) = h_data[i * d_H.size2() + j];
+      for (unsigned int i = 0; i < d_M; i++) {
+        for (unsigned int j = 0; j < d_N; j++) {
+          d_H(i, j) = h_data[i * d_N + j];
         }
       }
+
+      reorderHMatrix(d_H, d_L, d_U);
     }
 
     /*
@@ -65,7 +69,7 @@ namespace gr {
     void
     ldpc_encoder_bb_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
-      ninput_items_required[0] = 2 * noutput_items; // code rate 1/2
+      ninput_items_required[0] = noutput_items / 2; // code rate 1/2
     }
 
     int
@@ -77,12 +81,12 @@ namespace gr {
       const unsigned char *in = (const unsigned char *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
 
-      int min_input_required = d_H.size1() / 8;
+      int min_input_required = d_M / 8;
       int input_available = ninput_items[0];
       int input_consumed = 0;
 
       while (input_available >= min_input_required) {
-        ublas::vector<int> data(d_H.size1());
+        ublas::vector<int> data(d_M);
 
         // Populate data vector
         for (int i = 0; i < min_input_required; i++) {
@@ -94,8 +98,7 @@ namespace gr {
         }
 
         // Encode message
-        ublas::matrix<int> newH(d_H);
-        const ublas::vector<int> c = makeParityCheck(data, newH);
+        const ublas::vector<int> c = makeParityCheck(data, d_H, d_L, d_U);
 
         // Write check bytes to output
         for (int i = 0; i < min_input_required; i++) {
@@ -217,20 +220,13 @@ namespace gr {
       return x_vec;
     }
 
-    ublas::vector<int>
-    ldpc_encoder_bb_impl::makeParityCheck(const ublas::vector<int> &dSource,
-                                          ublas::matrix<int> &H)
-    {
+    void ldpc_encoder_bb_impl::reorderHMatrix(ublas::matrix<int> &H, ublas::matrix<int> &L, ublas::matrix<int> &U) {
       // Get matrix dimensions
       const unsigned int M = H.size1();
       const unsigned int N = H.size2();
 
       // Set a new matrix F for LU decomposition
       ublas::matrix<int> F(H);
-
-      // LU matrices
-      ublas::matrix<int> L(ublas::zero_matrix<int>(M, N - M));
-      ublas::matrix<int> U(ublas::zero_matrix<int>(M, N - M));
 
       // Re-order the M x (N - M) submatrix
       for (unsigned int i = 0; i < M; i++) {
@@ -243,6 +239,9 @@ namespace gr {
             break;
           }
         }
+
+        //std::cout << "chosenCol=" << chosenCol << std::endl;
+        //printMatrix<int>(H);
 
         // Re-ordering columns of F
         const ublas::vector<int> tmp1(ublas::column(F, i));
@@ -268,7 +267,18 @@ namespace gr {
             }
           }
         }
-      }
+      }  
+    }
+
+    ublas::vector<int>
+    ldpc_encoder_bb_impl::makeParityCheck(const ublas::vector<int> &dSource,
+                                          const ublas::matrix<int> &H,
+                                          const ublas::matrix<int> &L,
+                                          const ublas::matrix<int> &U)
+    {
+      // Get matrix dimensions
+      const unsigned int M = H.size1();
+      const unsigned int N = H.size2();
 
       // Find B.dsource
       const ublas::vector<int> z(mod2(ublas::prod(ublas::subrange(H, 0, M, N - M, N), dSource)));
