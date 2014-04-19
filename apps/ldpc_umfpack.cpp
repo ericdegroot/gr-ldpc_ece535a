@@ -160,17 +160,13 @@ ublas::vector<int> solve(const ublas::matrix<int> &A, const ublas::vector<int> &
   return x_vec;
 }
 
-ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource, ublas::matrix<int> &H) {
+void reorderHMatrix(ublas::matrix<int> &H, ublas::matrix<int> &L, ublas::matrix<int> &U) {
   // Get matrix dimensions
   const unsigned int M = H.size1();
   const unsigned int N = H.size2();
 
   // Set a new matrix F for LU decomposition
   ublas::matrix<int> F(H);
-
-  // LU matrices
-  ublas::matrix<int> L(ublas::zero_matrix<int>(M, N - M));
-  ublas::matrix<int> U(ublas::zero_matrix<int>(M, N - M));
 
   // Re-order the M x (N - M) submatrix
   for (unsigned int i = 0; i < M; i++) {
@@ -211,7 +207,13 @@ ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource, ublas::mat
         }
       }
     }
-  }
+  }  
+}
+
+ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource, const ublas::matrix<int> &H, const ublas::matrix<int> &L, const ublas::matrix<int> &U) {
+  // Get matrix dimensions
+  const unsigned int M = H.size1();
+  const unsigned int N = H.size2();
 
   // Find B.dsource
   const ublas::vector<int> z(mod2(ublas::prod(ublas::subrange(H, 0, M, N - M, N), dSource)));
@@ -415,6 +417,8 @@ const int hData3[] = {
   0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1
 };
 
+#define EBN0_SIZE 7
+
 int main() {
   boost::random::mt19937 gen;
   gen.seed(static_cast<unsigned int>(std::time(0)));
@@ -425,17 +429,23 @@ int main() {
   const unsigned int iterations = 5;
   const unsigned int frames = 30;
 
-  const double EbN0[4] = { 0, 0.5, 1.0, 1.5 };
-  double ber1[4];
+  const double EbN0[EBN0_SIZE] = { 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0  };
+  double ber1[EBN0_SIZE];
 
   ublas::matrix<int> H(M, N);
 
   initMatrix<int>(H, hData3);
 
+  // LU matrices
+  ublas::matrix<int> L(ublas::zero_matrix<int>(M, N - M));
+  ublas::matrix<int> U(ublas::zero_matrix<int>(M, N - M));
+
+  reorderHMatrix(H, L, U);
+
   boost::random::uniform_int_distribution<> uniformDistribution(0, 1);
   boost::random::normal_distribution<> normalDistribution;
 
-  for (unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < EBN0_SIZE; i++) {
     ber1[i] = 0;
 
     // Make random data (0/1)
@@ -453,8 +463,7 @@ int main() {
       std::cout << "Frame : " << j << std::endl;
 
       // Encoding message
-      ublas::matrix<int> newH(H);
-      const ublas::vector<int> c = makeParityCheck(ublas::column(dSource, j), newH);
+      const ublas::vector<int> c = makeParityCheck(ublas::column(dSource, j), H, L, U);
       
       //std::cout << "newH=" << std::endl;
       //printMatrix<int>(newH);
@@ -507,13 +516,13 @@ int main() {
   std::cout << std::endl;
 
   std::cout << "EbN0=[";
-  for (unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < EBN0_SIZE; i++) {
     std::cout << EbN0[i] << " ";
   }
   std::cout << "];" << std::endl;
 
   std::cout << "ber1=[";
-  for (unsigned int i = 0; i < 4; i++) {
+  for (unsigned int i = 0; i < EBN0_SIZE; i++) {
     std::cout << ber1[i] << " ";
   }
   std::cout << "];" << std::endl;
