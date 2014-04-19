@@ -69,7 +69,8 @@ namespace gr {
     void
     ldpc_encoder_bb_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
-      ninput_items_required[0] = noutput_items / 2; // code rate 1/2
+      // code rate 1/2
+      ninput_items_required[0] = std::ceil(noutput_items / 2.0);
     }
 
     int
@@ -82,10 +83,13 @@ namespace gr {
       unsigned char *out = (unsigned char *) output_items[0];
 
       int min_input_required = d_M / 8;
-      int input_available = ninput_items[0];
-      int input_consumed = 0;
+      int min_output_required = d_N / 8;
 
-      while (input_available >= min_input_required) {
+      int input_consumed = 0;
+      int output_produced = 0;
+
+      while ((noutput_items - output_produced) >= min_output_required
+             && (ninput_items[0] - input_consumed) >= min_input_required) {
         ublas::vector<int> data(d_M);
 
         // Populate data vector
@@ -120,8 +124,8 @@ namespace gr {
           in++;
         }
 
-        input_available -= min_input_required;
         input_consumed += min_input_required;
+        output_produced += min_input_required * 2;
       }
 
       // Tell runtime system how many input items we consumed on
@@ -129,7 +133,7 @@ namespace gr {
       consume_each(input_consumed);
 
       // Tell runtime system how many output items we produced.
-      return input_consumed * 2; // code rate 1/2
+      return output_produced; // code rate 1/2
     }
 
     ublas::vector<int>
