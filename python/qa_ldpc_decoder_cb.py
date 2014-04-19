@@ -41,12 +41,6 @@ class qa_ldpc_decoder_cb (gr_unittest.TestCase):
                 mod_frames += item
 
         expected_data  = ( 0b11101101, 0b00000010, 0b00110100, 0b10000000, 0b01010011, 0b00000110, 0b00110001, 0b11101000 )
-        expected_check = ( 0b10110100, 0b10101001, 0b11010101, 0b10001000, 0b01010000, 0b01011001, 0b10010000, 0b11110001 )
-
-        # expected result is alternating check,data,check,data,... bytes
-        expected_frames = tuple()
-        for pair in zip(expected_check, expected_data):
-            expected_frames += pair
 
         # set up fg
         src = blocks.vector_source_c(mod_frames, False)
@@ -60,7 +54,7 @@ class qa_ldpc_decoder_cb (gr_unittest.TestCase):
 
         # check data
         result = dst.data()
-        self.assertTupleEqual(expected_frames, result)
+        self.assertTupleEqual(expected_data, result)
 
 
 if __name__ == '__main__':

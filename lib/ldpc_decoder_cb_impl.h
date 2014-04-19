@@ -25,15 +25,20 @@ namespace gr {
     {
      private:
       digital::constellation_sptr d_constellation;
+      unsigned int d_M;
+      unsigned int d_N;
       ublas::matrix<int> d_H;
       unsigned int d_iterations;
 
-      ublas::vector<int>
-      decodeBitFlipping(const ublas::vector<double> &rx,
-                        const ublas::matrix<int> &H,
-                        const unsigned int iterations);
+      void reorderHMatrix(ublas::matrix<int> &H,
+                          ublas::matrix<int> &L,
+                          ublas::matrix<int> &U);
+      ublas::vector<int> decodeBitFlipping(const ublas::vector<double> &rx,
+                                           const ublas::matrix<int> &H,
+                                           const unsigned int iterations);
 
       int sign(double val);
+      ublas::vector<int> mod2(const ublas::vector<int> &u);
 
      public:
       ldpc_decoder_cb_impl();

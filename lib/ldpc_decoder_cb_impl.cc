@@ -33,7 +33,7 @@ namespace gr {
 		  gr::io_signature::make(1, 1, sizeof(gr_complex)),
                   gr::io_signature::make(1, 1, sizeof(unsigned char))),
         d_constellation(digital::constellation_bpsk::make()),
-        d_H(8, 16), d_iterations(5)
+        d_M(8), d_N(16), d_H(d_M, d_N), d_iterations(5)
     {
       // M = 8
       // N = 16
@@ -49,11 +49,15 @@ namespace gr {
         0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1
       };
  
-      for (unsigned int i = 0; i < d_H.size1(); i++) {
-        for (unsigned int j = 0; j < d_H.size2(); j++) {
-          d_H(i, j) = h_data[i * d_H.size2() + j];
+      for (unsigned int i = 0; i < d_M; i++) {
+        for (unsigned int j = 0; j < d_N; j++) {
+          d_H(i, j) = h_data[i * d_N + j];
         }
       }
+
+      ublas::matrix<int> L(ublas::zero_matrix<int>(d_M, d_N - d_M));
+      ublas::matrix<int> U(ublas::zero_matrix<int>(d_M, d_N - d_M));
+      reorderHMatrix(d_H, L, U);
     }
 
     /*
@@ -66,7 +70,7 @@ namespace gr {
     void
     ldpc_decoder_cb_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
-      ninput_items_required[0] = noutput_items * d_H.size1();
+      ninput_items_required[0] = noutput_items * d_N;
     }
 
     int
@@ -78,7 +82,9 @@ namespace gr {
       const gr_complex *in = (const gr_complex *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
 
-      int input_available = ninput_items[0];
+      int min_output_required = d_M / 8;
+
+      int input_consumed = 0;
       int output_produced = 0;
 
       /*
@@ -87,50 +93,89 @@ namespace gr {
       }
       */
 
-      while (input_available >= d_H.size2()) {
-        ublas::vector<double> tx(d_H.size2());
-        for (int i = 0; i < d_H.size2(); i++) {
+      while ((ninput_items[0] - input_consumed) >= d_N
+             && (noutput_items - output_produced) >= min_output_required) {
+        ublas::vector<double> tx(d_N);
+        for (int i = 0; i < d_N; i++) {
           tx(i) = (*in).real();
           in++;
         }
 
-        /*
-        std::cout << "tx=[";
-        for (int i = 0; i < tx.size(); i++)
-          std::cout << tx(i) << ",";
-        std::cout << "]" << std::endl;
-        */
-
-        input_available -= d_H.size2();
+        input_consumed += d_N;
 
         ublas::vector<int> vhat = decodeBitFlipping(tx, d_H, d_iterations);
 
-        /*
-        std::cout << "vhat=[";
-        for (int i = 0; i < vhat.size(); i++)
-          std::cout << vhat(i) << ",";
-        std::cout << "]" << std::endl;
-        */
+        for (int i = 0; i < min_output_required; i++) {
+          *out = 0;
 
-        int numBytes = vhat.size() / 8;
-        for (int i = 0; i < numBytes; i++) {
           for (int j = 0; j < 8; j++) {
-            if (vhat(i * 8 + j) == 1) {
+            if (vhat(d_M + i * 8 + j) == 1) {
               *out |= 1 << (7 - j);
             }
           }
 
           out++;
-          output_produced++;
         }
+
+        output_produced += min_output_required;
       }
 
       // Tell runtime system how many input items we consumed on
       // each input stream.
-      consume_each(ninput_items[0] - input_available);
+      consume_each(input_consumed);
 
       // Tell runtime system how many output items we produced.
       return output_produced;
+    }
+
+    void ldpc_decoder_cb_impl::reorderHMatrix(ublas::matrix<int> &H, ublas::matrix<int> &L, ublas::matrix<int> &U) {
+      // Get matrix dimensions
+      const unsigned int M = H.size1();
+      const unsigned int N = H.size2();
+
+      // Set a new matrix F for LU decomposition
+      ublas::matrix<int> F(H);
+
+      // Re-order the M x (N - M) submatrix
+      for (unsigned int i = 0; i < M; i++) {
+        int chosenCol = 0;
+
+        // Create diagonally structured matrix using 'First' strategy
+        for (unsigned int j = i; j < N; j++) {
+          if (F(i, j) != 0) {
+            chosenCol = j;
+            break;
+          }
+        }
+
+        //std::cout << "chosenCol=" << chosenCol << std::endl;
+        //printMatrix<int>(H);
+
+        // Re-ordering columns of F
+        const ublas::vector<int> tmp1(ublas::column(F, i));
+        ublas::column(F, i) = ublas::column(F, chosenCol);
+        ublas::column(F, chosenCol) = tmp1;
+
+        // Re-ordering columns of H
+        const ublas::vector<int> tmp2(ublas::column(H, i));
+        ublas::column(H, i) = ublas::column(H, chosenCol);
+        ublas::column(H, chosenCol) = tmp2;
+
+        // Fill the LU matrices column by column
+        ublas::subrange(L, i, M, i, i + 1) = ublas::subrange(F, i, M, i, i + 1);
+        ublas::subrange(U, 0, i + 1, i, i + 1) = ublas::subrange(F, 0, i + 1, i, i + 1);
+
+        // There will be no rows operation at the last row
+        if (i < M - 1) {
+          // Find the later rows with non-zero elements in column i
+          for (unsigned int k = i + 1; k < M; k++) {
+            if (F(k, i) != 0) {
+              // Add current row to the later rows which have a 1 in column i
+              ublas::row(F, k) = mod2(ublas::row(F, k) + ublas::row(F, i));
+            }
+          }
+        }
+      }  
     }
 
     ublas::vector<int>
@@ -228,6 +273,23 @@ namespace gr {
     ldpc_decoder_cb_impl::sign(double val)
     {
       return (val > 0) - (val < 0);
+    }
+
+    ublas::vector<int>
+    ldpc_decoder_cb_impl::mod2(const ublas::vector<int> &u)
+    {
+      ublas::vector<int> v(u.size());
+
+      for (unsigned int i = 0; i < u.size(); i++) {
+        v(i) = u(i) % 2;
+
+        // modulus result can be negative if u(i) negative, depending on implementation
+        if (v(i) < 0) {
+          v(i) += 2;
+        }
+      }
+
+      return v;
     }
 
   } /* namespace ldpc_ece535a */
