@@ -8,6 +8,7 @@ g++ -Wall -o ldpc_umfpack ldpc_umfpack.cpp -lumfpack -lamd
 
  */
 #include <iostream>
+#include <limits>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
@@ -241,6 +242,103 @@ ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource, const ubla
   return c;
 }
 
+ublas::vector<int> decodeLogDomainSimple(const ublas::vector<double> &rx, const ublas::matrix<int> &H, const unsigned int iterations) {
+  // Get matrix dimensions
+  const unsigned int M = H.size1();
+  const unsigned int N = H.size2();
+
+  // Prior hard-decision
+  ublas::vector<double> Lci(rx.size());
+  for (unsigned int i = 0; i < rx.size(); i++) {
+    Lci(i) = -rx(i);
+  }
+
+  // Initialization
+  ublas::matrix<double> Lrji(ublas::zero_matrix<double>(M, N));
+  ublas::matrix<double> Pibetaij(ublas::zero_matrix<double>(M, N));
+
+  // Associate the L(ci) matrix with non-zero elements of H
+  ublas::matrix<double> Lqij(M, N);
+  for (unsigned int i = 0; i < M; i++) {
+    ublas::row(Lqij, i) = ublas::element_prod(ublas::row(H, i), Lci);
+  }
+
+  ublas::vector<int> vHat(N);
+
+  // Iteration
+  for (unsigned int n = 0; n < iterations; n++) {
+    std::cout << "Iteration : " << n << std::endl;
+
+    // Get the sign and magnitude of L(qij)
+    ublas::matrix<int> alphaij(M, N);
+    ublas::matrix<double> betaij(M, N);
+    for (unsigned int i = 0; i < M; i++) {
+      for (unsigned int j = 0; j < N; j++) {
+        alphaij(i, j) = sign(Lqij(i, j));
+        betaij(i, j) = std::abs(Lqij(i, j));
+      }
+    }
+
+    // Horizontal step
+    for (unsigned int i = 0; i < M; i++) {
+      int prodOfalphaij = 1;
+      for (unsigned int j = 0; j < N; j++) {
+        if (H(i, j) != 0) {
+          prodOfalphaij *= alphaij(i, j);
+        }
+      }
+
+      // Get the minimum of betaij
+      for (unsigned int j = 0; j < N; j++) {
+        if (H(i, j) != 0) {
+          // Minimum of betaij
+          double minOfBetaij = std::numeric_limits<double>::max();
+          for (unsigned int k = 0; k < N; k++) {
+            if (j != k && H(i, k) != 0) {
+              if (betaij(i, k) < minOfBetaij) {
+                minOfBetaij = betaij(i, k);
+              }
+            }
+          }
+
+          // Multiplication alphaij
+          // Update L(rji)
+          Lrji(i, j) = prodOfalphaij * alphaij(i, j) * minOfBetaij;
+        }
+      }
+    }
+
+    // Vertical step
+    for (unsigned int j = 0; j < N; j++) {
+      double sumOfLrji = 0.0;
+      for (unsigned int i = 0; i < M; i++) {
+        if (H(i, j) != 0) {
+          sumOfLrji += Lrji(i, j);
+        }
+      }
+
+      for (unsigned int i = 0; i < M; i++) {
+        if (H(i, j) != 0) {
+          // Update L(qij) by summation of L(rij)
+          Lqij(i, j) = Lci(j) + sumOfLrji - Lrji(i, j);
+        }
+      }
+
+      // Get L(Qij)
+      double LQi = Lci(j) + sumOfLrji;
+
+      // Decode L(Qi)
+      if (LQi < 0) {
+        vHat(j) = 1;
+      } else {
+        vHat(j) = 0;
+      }
+    }
+  }
+
+  return vHat;
+}
+
 ublas::vector<int> decodeBitFlipping(const ublas::vector<double> &rx, const ublas::matrix<int> &H, const unsigned int iterations) {
   // Get matrix dimensions
   const unsigned int M = H.size1();
@@ -431,6 +529,7 @@ int main() {
 
   const double EbN0[EBN0_SIZE] = { 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0  };
   double ber1[EBN0_SIZE];
+  double ber2[EBN0_SIZE];
 
   ublas::matrix<int> H(M, N);
 
@@ -446,7 +545,8 @@ int main() {
   boost::random::normal_distribution<> normalDistribution;
 
   for (unsigned int i = 0; i < EBN0_SIZE; i++) {
-    ber1[i] = 0;
+    ber1[i] = 0.0;
+    ber2[i] = 0.0;
 
     // Make random data (0/1)
     ublas::matrix<int> dSource(M, frames);
@@ -508,9 +608,14 @@ int main() {
       double rat1 = biterr(vhat1, u);
       //std::cout << "rat1=" << rat1 << std::endl;
       ber1[i] += rat1;
+
+      ublas::vector<int> vhat2 = decodeLogDomainSimple(tx, H, iterations);
+      double rat2 = biterr(vhat2, u);
+      ber2[i] += rat2;
     }
 
     ber1[i] /= frames;
+    ber2[i] /= frames;
   }
 
   std::cout << std::endl;
@@ -527,7 +632,24 @@ int main() {
   }
   std::cout << "];" << std::endl;
 
-  std::cout << "semilogy(EbN0, ber1, 'o-');" << std::endl;
+  std::cout << "plot(EbN0, ber1, 'og-');" << std::endl;
+
+  std::cout << "hold;" << std::endl;
+
+  std::cout << "ber2=[";
+  for (unsigned int i = 0; i < EBN0_SIZE; i++) {
+    std::cout << ber2[i] << " ";
+  }
+  std::cout << "];" << std::endl;
+
+  std::cout << "plot(EbN0, ber2, 'ob--');" << std::endl;
+
+  std::cout << "grid on;" << std::endl;
+  std::cout << "hold off;" << std::endl;
+
+  std::cout << "legend('BitFlip', 'LogDomainSimple');" << std::endl;
+  std::cout << "xlabel('EbN0');" << std::endl;
+  std::cout << "ylabel('BER');" << std::endl;
 
   return 0;
 }
