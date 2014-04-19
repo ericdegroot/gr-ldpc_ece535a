@@ -434,6 +434,15 @@ ublas::vector<int> decodeBitFlipping(const ublas::vector<double> &rx, const ubla
   return vHat;
 }
 
+ublas::vector<int> decodeBPSK(const ublas::vector<double> &rx) {
+  ublas::vector<int> vHat(rx.size());
+  for (unsigned int i = 0; i < rx.size(); i++) {
+    vHat(i) = 0.5 * (sign(rx(i)) + 1);
+  }
+
+  return vHat;
+}
+
 double biterr(const ublas::vector<int> &u, const ublas::vector<int> &v) {
   int numErr = 0;
   for (unsigned int i = 0; i < u.size(); i++) {
@@ -523,7 +532,7 @@ const int hData3[] = {
   0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,1
 };
 
-#define EBN0_SIZE 7
+#define EBN0_SIZE 10
 
 int main() {
   boost::random::mt19937 gen;
@@ -535,7 +544,8 @@ int main() {
   const unsigned int iterations = 5;
   const unsigned int frames = 30;
 
-  const double EbN0[EBN0_SIZE] = { 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0  };
+  const double EbN0[EBN0_SIZE] = { -1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0  };
+  double ber0[EBN0_SIZE];
   double ber1[EBN0_SIZE];
   double ber2[EBN0_SIZE];
 
@@ -553,6 +563,7 @@ int main() {
   boost::random::normal_distribution<> normalDistribution;
 
   for (unsigned int i = 0; i < EBN0_SIZE; i++) {
+    ber0[i] = 0.0;
     ber1[i] = 0.0;
     ber2[i] = 0.0;
 
@@ -605,13 +616,17 @@ int main() {
         tx(k) += std::sqrt(N0) * normalDistribution(gen);
       }
 
-      std::cout << "tx=" << std::endl;
-      printVector<double>(tx);
+      //std::cout << "tx=" << std::endl;
+      //printVector<double>(tx);
+
+      ublas::vector<int> vhat0 = decodeBPSK(tx);
+      double rat0 = biterr(vhat0, u);
+      ber0[i] += rat0;
 
       ublas::vector<int> vhat1 = decodeBitFlipping(tx, H, iterations); // newH
 
-      std::cout << "vhat1=" << std::endl;
-      printVector<int>(vhat1);
+      //std::cout << "vhat1=" << std::endl;
+      //printVector<int>(vhat1);
 
       double rat1 = biterr(vhat1, u);
       //std::cout << "rat1=" << rat1 << std::endl;
@@ -622,6 +637,7 @@ int main() {
       ber2[i] += rat2;
     }
 
+    ber0[i] /= frames;
     ber1[i] /= frames;
     ber2[i] /= frames;
   }
@@ -634,6 +650,16 @@ int main() {
   }
   std::cout << "];" << std::endl;
 
+  std::cout << "ber0=[";
+  for (unsigned int i = 0; i < EBN0_SIZE; i++) {
+    std::cout << ber0[i] << " ";
+  }
+  std::cout << "];" << std::endl;
+
+  std::cout << "plot(EbN0, ber0, 'or--');" << std::endl;
+
+  std::cout << "hold;" << std::endl;
+
   std::cout << "ber1=[";
   for (unsigned int i = 0; i < EBN0_SIZE; i++) {
     std::cout << ber1[i] << " ";
@@ -642,20 +668,18 @@ int main() {
 
   std::cout << "plot(EbN0, ber1, 'og-');" << std::endl;
 
-  std::cout << "hold;" << std::endl;
-
   std::cout << "ber2=[";
   for (unsigned int i = 0; i < EBN0_SIZE; i++) {
     std::cout << ber2[i] << " ";
   }
   std::cout << "];" << std::endl;
 
-  std::cout << "plot(EbN0, ber2, 'ob--');" << std::endl;
+  std::cout << "plot(EbN0, ber2, 'ob-');" << std::endl;
 
   std::cout << "grid on;" << std::endl;
   std::cout << "hold off;" << std::endl;
 
-  std::cout << "legend('BitFlip', 'LogDomainSimple');" << std::endl;
+  std::cout << "legend('BPSK', 'BitFlip', 'LogDomainSimple');" << std::endl;
   std::cout << "xlabel('EbN0');" << std::endl;
   std::cout << "ylabel('BER');" << std::endl;
 
