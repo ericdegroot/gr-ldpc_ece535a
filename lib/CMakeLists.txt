@@ -26,7 +26,7 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
 list(APPEND ldpc_ece535a_sources
-    ldpc_encoder_bb_impl.cc
+    ldpc_encoder_bc_impl.cc
     ldpc_decoder_cb_impl.cc
 )
 

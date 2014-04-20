@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LDPC_ECE535A_LDPC_ENCODER_BB_IMPL_H
 #define INCLUDED_LDPC_ECE535A_LDPC_ENCODER_BB_IMPL_H
 
-#include <ldpc_ece535a/ldpc_encoder_bb.h>
+#include <ldpc_ece535a/ldpc_encoder_bc.h>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -33,7 +33,7 @@ namespace gr {
 
     using namespace boost::numeric;
 
-    class ldpc_encoder_bb_impl : public ldpc_encoder_bb
+    class ldpc_encoder_bc_impl : public ldpc_encoder_bc
     {
      private:
       unsigned int d_M;
@@ -56,8 +56,8 @@ namespace gr {
       ublas::vector<int> mod2(const ublas::vector<int> &u);
 
      public:
-      ldpc_encoder_bb_impl();
-      ~ldpc_encoder_bb_impl();
+      ldpc_encoder_bc_impl();
+      ~ldpc_encoder_bc_impl();
 
       // Where all the action really happens
       void forecast (int noutput_items, gr_vector_int &ninput_items_required);
@@ -71,5 +71,5 @@ namespace gr {
   } // namespace ldpc_ece535a
 } // namespace gr
 
-#endif /* INCLUDED_LDPC_ECE535A_LDPC_ENCODER_BB_IMPL_H */
+#endif /* INCLUDED_LDPC_ECE535A_LDPC_ENCODER_BC_IMPL_H */
 

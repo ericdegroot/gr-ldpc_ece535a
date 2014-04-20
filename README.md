@@ -21,14 +21,14 @@ Components
 LDPC Encoder
 ------------
 
-lib/ldpc_encoder_bb_impl.cc
+lib/ldpc_encoder_bc_impl.cc
 
 This is the C++ source code file for the LDPC Encoder block. DSP code will be added to the work method.
 
 LDPC Decoder
 ------------
 
-lib/ldpc_decoder_bb_impl.cc
+lib/ldpc_decoder_cb_impl.cc
 
 This is the C++ source code file for the LDPC Decoder block. DSP code will be added to the work method.
 

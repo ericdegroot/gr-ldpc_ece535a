@@ -18,6 +18,6 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    ldpc_ece535a_ldpc_encoder_bb.xml
+    ldpc_ece535a_ldpc_encoder_bc.xml
     ldpc_ece535a_ldpc_decoder_cb.xml DESTINATION share/gnuradio/grc/blocks
 )

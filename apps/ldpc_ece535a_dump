@@ -39,17 +39,17 @@ class top_block(gr.top_block):
         self.samp_rate = samp_rate = 1000
 
         # Blocks
-        self.ldpc_ece535a_ldpc_encoder_bb_0 = ldpc_ece535a.ldpc_encoder_bb()
-        self.ldpc_ece535a_ldpc_decoder_bb_0 = ldpc_ece535a.ldpc_decoder_bb()
+        self.ldpc_ece535a_ldpc_encoder_bc_0 = ldpc_ece535a.ldpc_encoder_bc()
+        self.ldpc_ece535a_ldpc_decoder_cb_0 = ldpc_ece535a.ldpc_decoder_cb()
         self.dump_sink_0 = dump_sink()
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_char*1, samp_rate,True)
         self.analog_random_source_x_0 = blocks.vector_source_b(map(int, numpy.random.randint(32, 127, samp_rate)), True)
 
         # Connections
-        self.connect((self.ldpc_ece535a_ldpc_encoder_bb_0, 0), (self.ldpc_ece535a_ldpc_decoder_bb_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.ldpc_ece535a_ldpc_encoder_bb_0, 0))
+        self.connect((self.ldpc_ece535a_ldpc_encoder_bc_0, 0), (self.ldpc_ece535a_ldpc_decoder_cb_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.ldpc_ece535a_ldpc_encoder_bc_0, 0))
         self.connect((self.analog_random_source_x_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.ldpc_ece535a_ldpc_decoder_bb_0, 0), (self.dump_sink_0, 0))
+        self.connect((self.ldpc_ece535a_ldpc_decoder_cb_0, 0), (self.dump_sink_0, 0))
 
 
 if __name__ == '__main__':

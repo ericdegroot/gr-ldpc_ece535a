@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
   <name>LDPC Encoder (ECE 535A)</name>
-  <key>ldpc_ece535a_ldpc_encoder_bb</key>
+  <key>ldpc_ece535a_ldpc_encoder_cb</key>
   <category>ldpc_ece535a</category>
   <import>import ldpc_ece535a</import>
-  <make>ldpc_ece535a.ldpc_encoder_bb()</make>
+  <make>ldpc_ece535a.ldpc_encoder_cb()</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
@@ -25,6 +25,6 @@
 
   <source>
     <name>out</name>
-    <type>byte</type>
+    <type>complex</type>
   </source>
 </block>

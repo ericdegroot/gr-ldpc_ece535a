@@ -22,6 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    ldpc_encoder_bb.h
+    ldpc_encoder_bc.h
     ldpc_decoder_cb.h DESTINATION include/ldpc_ece535a
 )
