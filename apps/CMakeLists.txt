@@ -29,3 +29,9 @@ add_executable(ldpc_umfpack
 )
 
 target_link_libraries(ldpc_umfpack umfpack amd)
+
+add_executable(ldpc_lapack
+    ${CMAKE_CURRENT_SOURCE_DIR}/ldpc_lapack.cpp
+)
+
+target_link_libraries(ldpc_lapack lapack lapacke)
