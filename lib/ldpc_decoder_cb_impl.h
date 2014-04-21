@@ -9,8 +9,6 @@
 
 #include <ldpc_ece535a/ldpc_decoder_cb.h>
 
-#include <gnuradio/digital/constellation.h>
-
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -24,7 +22,6 @@ namespace gr {
     class ldpc_decoder_cb_impl : public ldpc_decoder_cb
     {
      private:
-      digital::constellation_sptr d_constellation;
       unsigned int d_M;
       unsigned int d_N;
       ublas::matrix<int> d_H;

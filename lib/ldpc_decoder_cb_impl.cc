@@ -32,7 +32,6 @@ namespace gr {
       : gr::block("ldpc_decoder_cb",
 		  gr::io_signature::make(1, 1, sizeof(gr_complex)),
                   gr::io_signature::make(1, 1, sizeof(unsigned char))),
-        d_constellation(digital::constellation_bpsk::make()),
         d_M(8), d_N(16), d_H(d_M, d_N), d_iterations(5)
     {
       // M = 8
@@ -87,21 +86,12 @@ namespace gr {
       int input_consumed = 0;
       int output_produced = 0;
 
-      /*
-      for (int i = 0; i < noutput_items; i++) {
-        out[i] = d_constellation->decision_maker(&in[i]);
-      }
-      */
-
       while ((ninput_items[0] - input_consumed) >= d_N
              && (noutput_items - output_produced) >= min_output_required) {
         ublas::vector<double> tx(d_N);
         for (int i = 0; i < d_N; i++) {
-          tx(i) = (*in).real();
-          in++;
+          tx(i) = in[i].real();
         }
-
-        input_consumed += d_N;
 
         ublas::vector<int> vhat = decodeBitFlipping(tx, d_H, d_iterations);
 
@@ -117,6 +107,9 @@ namespace gr {
           out++;
         }
 
+        in += d_N;
+
+        input_consumed += d_N;
         output_produced += min_output_required;
       }
 
