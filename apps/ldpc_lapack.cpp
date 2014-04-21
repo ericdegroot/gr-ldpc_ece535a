@@ -3,16 +3,16 @@ ECE 535A LDPC Project Testing
 
 Required packages:
 
-  Fedora: boost-devel suitesparse-devel
-  Ubuntu: libsuitesparse-dev libboost-all-dev
+  Fedora: boost-devel lapack-devel
+  Ubuntu: libboost-all-dev liblapack-dev
 
 Build:
 
-  g++ -Wall -o ldpc_umfpack ldpc_umfpack.cpp -lumfpack -lamd
+  g++ -Wall -o ldpc_lapack ldpc_lapack.cpp -llapack -llapacke
 
 Run:
 
-  ./ldpc_umfpack
+  ./ldpc_lapack
 
  */
 #include <iostream>
