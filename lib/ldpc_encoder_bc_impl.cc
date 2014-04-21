@@ -15,6 +15,8 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
+#include <lapacke/lapacke.h>
+
 namespace gr {
   namespace ldpc_ece535a {
 
@@ -135,85 +137,42 @@ namespace gr {
                                 const ublas::vector<int> &B)
     {
       const int n = A.size1();
+      const int nrhs = 1;
+      const int lda = n;
+      const int ldb = nrhs;
 
-      // Count non-zero entries
-      int nz = 0;
+      int *ipiv = new int[n];
+
+      double *a = new double[lda * n];
       for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-          if (A(i, j) != 0) {
-            nz++;
-          }
+          a[i * n + j] = A(i, j);
         }
       }
 
-      int *Ti = new int[nz];
-      int *Tj = new int[nz];
-      double *Tx = new double[nz];
-
-      int k = 0;
-      for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-          if (A(i, j) != 0) {
-            Ti[k] = i;
-            Tj[k] = j;
-            Tx[k] = A(i, j);
-            k++;
-          }
-        }
-      }
-
-      double *b = new double[n];
-
+      double *b = new double[ldb * n];
       for (int i = 0; i < n; i++) {
         b[i] = B(i);
       }
 
-      int *Ap = new int[n + 1];
-      int *Ai = new int[nz];
-      double *Ax = new double[nz];
-
-      int status = umfpack_di_triplet_to_col(n, n, nz, Ti, Tj, Tx, Ap, Ai, Ax, NULL);
-      if (status != UMFPACK_OK) {
-        std::cerr << "umfpack_di_triplet_to_col(): ERROR" << std::endl;
-      }
-
-      delete[] Ti;
-      delete[] Tj;
-      delete[] Tx;
-
-      void *symbolic;
-      status = umfpack_di_symbolic(n, n, Ap, Ai, Ax, &symbolic, NULL, NULL);
-      if (status != UMFPACK_OK) {
-        std::cerr << "umfpack_di_symbolic(): ERROR" << std::endl;
-      }
-
-      void *numeric;
-      status = umfpack_di_numeric(Ap, Ai, Ax, symbolic, &numeric, NULL, NULL);
-      if (status != UMFPACK_OK) {
-        std::cerr << "umfpack_di_numeric(): ERROR" << std::endl;
-      }
-
-      umfpack_di_free_symbolic(&symbolic);
-
-      double *x = new double[n];
-      status = umfpack_di_solve(UMFPACK_A, Ap, Ai, Ax, x, b, numeric, NULL, NULL);
-      if (status != UMFPACK_OK) {
-        std::cerr << "umfpack_di_solve(): ERROR" << std::endl;
-      }
-
-      umfpack_di_free_numeric(&numeric);
-
-      delete[] b;
-      delete[] Ap;
-      delete[] Ai;
-      delete[] Ax;
-
       ublas::vector<int> x_vec(n);
-      for (int i = 0; i < n; i++) {
-        x_vec(i) = x[i];
+
+      const int info = LAPACKE_dgesv(LAPACK_ROW_MAJOR, n, nrhs, a, lda, ipiv, b, ldb);
+      if (info > 0) {
+        std::cerr << "The diagonal element of the triangular factor of A, "
+                  << "U(" << info << "," << info << ") is zero, so that A is singular; "
+                  << "the solution could not be computed." << std::endl;
+      } else if (info < 0) {
+        std::cerr << "Illegal value for argument " << -info << "." << std::endl;
+      } else {
+        for (int i = 0; i < n; i++) {
+          x_vec(i) = b[i];
+        }
       }
 
-      delete[] x;
+      delete[] a;
+      delete[] b;
+      delete[] ipiv;
 
       return x_vec;
     }

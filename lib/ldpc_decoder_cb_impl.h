@@ -12,8 +12,6 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
-#include <suitesparse/umfpack.h>
-
 namespace gr {
   namespace ldpc_ece535a {
 
