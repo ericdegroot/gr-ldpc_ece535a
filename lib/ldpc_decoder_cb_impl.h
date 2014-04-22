@@ -9,6 +9,8 @@
 
 #include <ldpc_ece535a/ldpc_decoder_cb.h>
 
+#include <boost/random.hpp>
+
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -20,14 +22,23 @@ namespace gr {
     class ldpc_decoder_cb_impl : public ldpc_decoder_cb
     {
      private:
+      int d_state;
       unsigned int d_M;
       unsigned int d_N;
       ublas::matrix<int> d_H;
       unsigned int d_iterations;
 
+      boost::random::mt19937 d_gen;
+      boost::random::uniform_int_distribution<> d_uDist;
+
+      int checkFrame(const ublas::vector<int> &u,
+                     const int threshold);
       void reorderHMatrix(ublas::matrix<int> &H,
                           ublas::matrix<int> &L,
                           ublas::matrix<int> &U);
+      ublas::vector<int> decodeLogDomainSimple(const ublas::vector<double> &rx,
+                                               const ublas::matrix<int> &H,
+                                               const unsigned int iterations);
       ublas::vector<int> decodeBitFlipping(const ublas::vector<double> &rx,
                                            const ublas::matrix<int> &H,
                                            const unsigned int iterations);
