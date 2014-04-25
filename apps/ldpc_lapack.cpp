@@ -241,6 +241,99 @@ ublas::vector<int> makeParityCheck(const ublas::vector<int> &dSource, const ubla
   return c;
 }
 
+int checkFrame(const ublas::vector<int> &u, const ublas::matrix<int> &H, const int threshold) {
+  int sNotZero = 0;
+  for (unsigned int k = 0; k < H.size1(); k++) {
+    int s = ublas::inner_prod(u, ublas::row(H, k)) % 2;
+    if (s != 0) {
+      sNotZero++;
+    }
+
+    if (sNotZero > threshold) {
+      break;
+    }
+  }
+
+  return sNotZero;
+}
+
+ublas::vector<int> decodeSumProductSoft(const ublas::vector<double> &rx, const ublas::matrix<int> &H, const unsigned int iterations) {
+  const unsigned int m = H.size1();
+  const unsigned int n = H.size2();
+
+  ublas::vector<double> r(-rx);
+
+  // Initialization
+  ublas::matrix<double> M(ublas::zero_matrix<double>(m, n));
+  for (unsigned int j = 0; j < m; j++) {
+    for (unsigned int i = 0; i < n; i++) {
+      if (H(j, i) != 0) {
+        M(j, i) = r(i);
+      }
+    }
+  }
+
+  ublas::vector<int> vHat(n);
+  ublas::matrix<double> E(m, n);
+
+  for (unsigned int h = 0; h < iterations; h++) {
+    // Step 1: Check messages
+    for (unsigned int j = 0; j < m; j++) {
+      for (unsigned int i = 0; i < n; i++) {
+        if (H(j, i) != 0) {
+          double T = 1.0;
+          for (unsigned int k = 0; k < n; k++) {
+            if (H(j, k) != 0 && k != i) {
+              T *= std::tanh(M(j, k) / 2.0);
+            }
+          }
+
+          E(j, i) = std::log((1.0 + T) / (1.0 - T));
+        }
+      }
+    }
+
+    // Test
+    for (unsigned int i = 0; i < n; i++) {
+      double L = 0.0;
+      for (unsigned int j = 0; j < m; j++) {
+        if (H(j, i) != 0) {
+          L += E(j, i) + r(i);
+        }
+      }
+
+      if (L <= 0) {
+        vHat(i) = 1;
+      } else {
+        vHat(i) = 0;
+      }
+    }
+    
+    // Finished?
+    if (checkFrame(vHat, H, 0) == 0) {
+      break;
+    }
+
+    // Step 2: Bit messages
+    for (unsigned int j = 0; j < m; j++) {
+      for (unsigned int i = 0; i < n; i++) {
+        if (H(j, i) != 0) {
+          double T = 0.0;
+          for (unsigned int k = 0; k < m; k++) {
+            if (k != j && H(k, i) != 0) {
+              T += E(k, i) + r(i);
+            }          
+          }
+
+          M(j, i) = T;
+        }
+      }
+    }
+  }
+
+  return vHat;
+}
+
 ublas::vector<int> decodeLogDomainSimple(const ublas::vector<double> &rx, const ublas::matrix<int> &H, const unsigned int iterations) {
   // Get matrix dimensions
   const unsigned int M = H.size1();
@@ -333,6 +426,11 @@ ublas::vector<int> decodeLogDomainSimple(const ublas::vector<double> &rx, const 
         vHat(j) = 0;
       }
     }
+
+    // Finished?
+    if (n + 1 < iterations && checkFrame(vHat, H, 0) == 0) {
+      break;
+    }    
   }
 
   return vHat;
@@ -344,85 +442,58 @@ ublas::vector<int> decodeBitFlipping(const ublas::vector<double> &rx, const ubla
   const unsigned int N = H.size2();
 
   // Prior hard-decision
-  ublas::vector<int> ci(rx.size());
+  ublas::vector<int> y(rx.size());
   for (unsigned int i = 0; i < rx.size(); i++) {
-    ci(i) = 0.5 * (sign(rx(i)) + 1);
+    if (rx(i) < 0.0) {
+      y(i) = 0;
+    } else {
+      y(i) = 1;
+    }
   }
 
-  //std::cout << "ci=" << std::endl;
-  //printVector<int>(ci);
+  ublas::vector<int> ci(y);
 
   // Initialization
-  ublas::matrix<int> rji(ublas::zero_matrix<int>(M, N));
-
-  // Associate the ci matrix with non-zero elements of H
-  ublas::matrix<int> qij(M, N);
-  for (unsigned int i = 0; i < M; i++) {
-    ublas::row(qij, i) = ublas::element_prod(ublas::row(H, i), ci);
-  }
-
-  //std::cout << "qij=" << std::endl;
-  //printMatrix<int>(qij);
-
-  ublas::vector<int> vHat(N);
+  ublas::matrix<int> E(ublas::zero_matrix<int>(M, N));
 
   // Iteration
   for (unsigned int n = 0; n < iterations; n++) {
-    //std::cout << "Iteration : " << n << std::endl;
-
-    // Horizontal step
+    // Calculate check node messages
     for (unsigned int i = 0; i < M; i++) {
-      int qijSum = 0;
       for (unsigned int j = 0; j < N; j++) {
-        if (H(i, j) != 0) {
-          qijSum += qij(i, j);
-        }
-      }
-
-      for (unsigned int j = 0; j < N; j++) {
-        if (H(i, j) != 0) {
-          rji(i, j) = (qijSum + qij(i, j)) % 2;
-        }
-      }
-    }
-
-    // Vertical step
-    for (unsigned int j = 0; j < N; j++) {
-      int rjiNumberOfOnes = 0;
-      for (unsigned int i = 0; i < M; i++) {
-        if (rji(i, j) != 0) {
-          rjiNumberOfOnes++;
-        }
-      }
-
-      int hNumberOfOnes = 0;
-      for (unsigned int i = 0; i < M; i++) {
-        if (H(i, j) != 0) {
-          hNumberOfOnes++;
-        }
-      }
-      
-      for (unsigned int i = 0; i < M; i++) {
-        if (H(i, j) != 0) {
-          // Update qij, set '1' for majority of 1s else '0', excluding i
-          if (rjiNumberOfOnes + ci(j) >= hNumberOfOnes - rjiNumberOfOnes + rji(i, j)) {
-            qij(i, j) = 1;
-          } else {
-            qij(i, j) = 0;
+        int ciMod2Sum = 0;
+        for (unsigned int k = 0; k < N; k++) {
+          if (k != j && H(i, k) != 0) {
+            ciMod2Sum += ci(k);
           }
         }
-      }
-
-      // Bit decoding
-      if (rjiNumberOfOnes + ci(j) >= hNumberOfOnes - rjiNumberOfOnes) {
-        vHat(j) = 1;
-      } else {
-        vHat(j) = 0;
+        
+        E(i, j) = ciMod2Sum % 2;
       }
     }
+
+    // Compare check node messages with y
+    for (unsigned int j = 0; j < N; j++) {
+      int disagreements = 0;
+      for (unsigned int i = 0; i < M; i++) {
+        if (H(i, j) != 0 && E(i, j) != y(j)) {
+          disagreements++;
+        }
+      }
+
+      // Do the majority of messages disagree with y?
+      if (disagreements > M / 2) {
+        ci(j) = (y(j) + 1) % 2;
+      }
+    }
+
+    // Finished?
+    if (n + 1 < iterations && checkFrame(ci, H, 0) == 0) {
+      break;
+    }    
   }
 
-  return vHat;
+  return ci;
 }
 
 ublas::vector<int> decodeBPSK(const ublas::vector<double> &rx) {
@@ -473,10 +544,12 @@ int main() {
   double ber0[EBN0_SIZE];
   double ber1[EBN0_SIZE];
   double ber2[EBN0_SIZE];
+  double ber3[EBN0_SIZE];
 
   ublas::vector<int> fer0(EBN0_SIZE);
   ublas::vector<int> fer1(EBN0_SIZE);
   ublas::vector<int> fer2(EBN0_SIZE);
+  ublas::vector<int> fer3(EBN0_SIZE);
 
   ublas::matrix<int> H(M, N);
 
@@ -511,10 +584,12 @@ int main() {
     ber0[i] = 0.0;
     ber1[i] = 0.0;
     ber2[i] = 0.0;
+    ber3[i] = 0.0;
 
     fer0(i) = 0;
     fer1(i) = 0;
     fer2(i) = 0;
+    fer3(i) = 0;
 
     // Make random data (0/1)
     ublas::matrix<int> dSource(M, frames);
@@ -586,6 +661,10 @@ int main() {
       double rat2 = biterr(vhat2, u);
       ber2[i] += rat2;
 
+      ublas::vector<int> vhat3 = decodeSumProductSoft(tx, H, iterations);
+      double rat3 = biterr(vhat3, u);
+      ber3[i] += rat3;
+
       // Check messages
       if (checkMessage(vhat0, H) > 0) {
         if (rat0 <= 0.0) {
@@ -616,11 +695,22 @@ int main() {
       } else if (rat2 > 0) {
         //std::cout << "False positive: rat2=" << rat2 << std::endl;
       }
+
+      if (checkMessage(vhat3, H) > 0) {
+        if (rat3 <= 0.0) {
+          //std::cout << "False negative: rat3=" << rat3 << std::endl;
+        }
+
+        fer3(i)++;
+      } else if (rat3 > 0) {
+        //std::cout << "False positive: rat3=" << rat3 << std::endl;
+      }
     }
 
     ber0[i] /= frames;
     ber1[i] /= frames;
     ber2[i] /= frames;
+    ber3[i] /= frames;
   }
 
   std::cout << std::endl;
@@ -667,11 +757,19 @@ int main() {
 
   std::cout << "plot(EbN0, ber2, 'ob-');" << std::endl;
 
+  std::cout << "ber3=[";
+  for (unsigned int i = 0; i < EBN0_SIZE; i++) {
+    std::cout << ber3[i] << " ";
+  }
+  std::cout << "];" << std::endl;
+
+  std::cout << "plot(EbN0, ber3, 'om-');" << std::endl;
+
   std::cout << "grid on;" << std::endl;
   std::cout << "hold off;" << std::endl;
 
   std::cout << "title('Bit Error Rate');" << std::endl;
-  std::cout << "legend('BPSK', 'BitFlip', 'LogDomainSimple');" << std::endl;
+  std::cout << "legend('BPSK', 'BitFlip', 'LogDomainSimple', 'SumProduct');" << std::endl;
   std::cout << "xlabel('EbN0');" << std::endl;
   std::cout << "ylabel('BER');" << std::endl;
 
@@ -697,11 +795,17 @@ int main() {
 
   std::cout << "plot(EbN0, fer2, 'ob-');" << std::endl;
 
+  std::cout << "fer3=[" << std::endl;
+  printVector<int>(fer3);
+  std::cout << "];" << std::endl;  
+
+  std::cout << "plot(EbN0, fer3, 'om-');" << std::endl;
+
   std::cout << "grid on;" << std::endl;
   std::cout << "hold off;" << std::endl;
 
   std::cout << "title('Frame Errors');" << std::endl;
-  std::cout << "legend('BPSK', 'BitFlip', 'LogDomainSimple');" << std::endl;
+  std::cout << "legend('BPSK', 'BitFlip', 'LogDomainSimple', 'SumProduct');" << std::endl;
   std::cout << "xlabel('EbN0');" << std::endl;
   std::cout << "ylabel('FER');" << std::endl;
 
