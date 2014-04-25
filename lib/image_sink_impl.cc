@@ -48,10 +48,14 @@ namespace gr {
         const unsigned char *in = (const unsigned char *) input_items[0];
 
         for (int i = 0; i < noutput_items; i++) {
-          if (i < noutput_items - 14 && in[i] == 0x42 && in[i + 1] == 0x4D && in[i + 2] == 0xD0 &&
-              in[i + 3] == 0xF1 && in[i + 4] == 0x01 && in[i + 5] == 0x00 && in[i + 6] == 0x00 &&
+          /*
+          if (i < noutput_items - 14 && in[i] == 0x42 && in[i + 1] == 0x4D && in[i + 2] == 0x36 &&
+              in[i + 3] == 0x4C && in[i + 4] == 0x02 && in[i + 5] == 0x00 && in[i + 6] == 0x00 &&
               in[i + 7] == 0x00 && in[i + 8] == 0x00 && in[i + 9] == 0x00 && in[i + 10] == 0x36 &&
-              in[i + 11] == 0x04 && in[i + 12] == 0x00 && in[i + 13] == 0x00) {
+              in[i + 11] == 0x00 && in[i + 12] == 0x00 && in[i + 13] == 0x00) {
+          */
+          if (i < noutput_items - 4 && in[i] == 0x42 && in[i + 1] == 0x4D && in[i + 2] == 0x46 &&
+              in[i + 3] == 0x4B) {
             std::cout << "Header Found" << std::endl;
 
             if (d_buffer.length() > 0) {

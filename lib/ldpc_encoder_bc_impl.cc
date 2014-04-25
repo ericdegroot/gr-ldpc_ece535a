@@ -140,10 +140,12 @@ namespace gr {
           for (int j = 0; j < 8; j++) {
             int b = *in & (1 << (7 - j));
             data(i * 8 + j) = b == 0 ? 0 : 1;
+            //std::cout << data(i * 8 + j);
           }
 
           in++;
         }
+        //std::cout << std::endl;
 
         // Encode message
         const ublas::vector<int> c = makeParityCheck(data, d_H, d_L, d_U);
@@ -151,14 +153,17 @@ namespace gr {
         // Write check to output
         for (unsigned int i = 0; i < c.size(); i++) {
           *out = c(i) == 1 ? 1 : -1;
+          //std::cout << *out;
           out++;
         }
 
         // Write data to output
         for (unsigned int i = 0; i < data.size(); i++) {
           *out = data(i) == 1 ? 1 : -1;
+          //std::cout << *out;
           out++;
         }
+        //std::cout << std::endl;
 
         input_consumed += min_input_required;
         output_produced += d_N;

@@ -200,7 +200,7 @@ namespace gr {
           d_state = STATE_IN_SYNC;
         }
 
-        if (d_state == STATE_IN_SYNC) {
+        if (d_state == STATE_IN_SYNC || d_state == STATE_IN_SYNC_INVERTED) {
           // Send data bits to output byte stream
           for (int i = 0; i < min_output_required; i++) {
             *out = 0;

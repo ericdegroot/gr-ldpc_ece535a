@@ -1,39 +1,82 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Mon Apr 21 23:22:38 2014</timestamp>
+  <timestamp>Fri Apr 25 15:46:31 2014</timestamp>
   <block>
-    <key>digital_costas_loop_cc</key>
+    <key>options</key>
     <param>
       <key>id</key>
-      <value>digital_costas_loop_cc_0</value>
+      <value>receiver</value>
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>w</key>
-      <value>phase_bw</value>
-    </param>
-    <param>
-      <key>order</key>
-      <value>len(constellation.points())</value>
-    </param>
-    <param>
-      <key>affinity</key>
+      <key>title</key>
       <value></value>
     </param>
     <param>
-      <key>minoutbuf</key>
+      <key>author</key>
+      <value></value>
+    </param>
+    <param>
+      <key>description</key>
+      <value></value>
+    </param>
+    <param>
+      <key>window_size</key>
+      <value>1280, 1024</value>
+    </param>
+    <param>
+      <key>generate_options</key>
+      <value>qt_gui</value>
+    </param>
+    <param>
+      <key>category</key>
+      <value>Custom</value>
+    </param>
+    <param>
+      <key>run_options</key>
+      <value>prompt</value>
+    </param>
+    <param>
+      <key>run</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>max_nouts</key>
       <value>0</value>
     </param>
     <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
+      <key>realtime_scheduling</key>
+      <value></value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(466, 406)</value>
+      <value>(10, 10)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>variable</key>
+    <param>
+      <key>id</key>
+      <value>samp_rate</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>200000</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(23, 105)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -205,7 +248,7 @@
     <key>variable</key>
     <param>
       <key>id</key>
-      <value>samp_rate</value>
+      <value>constellation</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -213,11 +256,11 @@
     </param>
     <param>
       <key>value</key>
-      <value>100000</value>
+      <value>digital.bpsk_constellation()</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(23, 105)</value>
+      <value>(154, 101)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -241,29 +284,6 @@
     <param>
       <key>_coordinate</key>
       <value>(225, 25)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>variable</key>
-    <param>
-      <key>id</key>
-      <value>constellation</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>digital.bpsk_constellation()</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(154, 101)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -334,57 +354,6 @@
     </param>
   </block>
   <block>
-    <key>digital_fll_band_edge_cc</key>
-    <param>
-      <key>id</key>
-      <value>digital_fll_band_edge_cc_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>type</key>
-      <value>cc</value>
-    </param>
-    <param>
-      <key>samps_per_sym</key>
-      <value>samples_per_symbol</value>
-    </param>
-    <param>
-      <key>rolloff</key>
-      <value>excess_bw</value>
-    </param>
-    <param>
-      <key>filter_size</key>
-      <value>55</value>
-    </param>
-    <param>
-      <key>w</key>
-      <value>freq_bw</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(212, 210)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>180</value>
-    </param>
-  </block>
-  <block>
     <key>analog_agc2_xx</key>
     <param>
       <key>id</key>
@@ -440,127 +409,10 @@
     </param>
   </block>
   <block>
-    <key>ldpc_ece535a_ldpc_decoder_cb</key>
+    <key>digital_fll_band_edge_cc</key>
     <param>
       <key>id</key>
-      <value>ldpc_ece535a_ldpc_decoder_cb_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(835, 390)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>blocks_uchar_to_float</key>
-    <param>
-      <key>id</key>
-      <value>blocks_uchar_to_float_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(857, 597)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>180</value>
-    </param>
-  </block>
-  <block>
-    <key>qtgui_histogram_sink_x</key>
-    <param>
-      <key>id</key>
-      <value>qtgui_histogram_sink_x_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>name</key>
-      <value>QT GUI Plot</value>
-    </param>
-    <param>
-      <key>size</key>
-      <value>1024</value>
-    </param>
-    <param>
-      <key>bins</key>
-      <value>256</value>
-    </param>
-    <param>
-      <key>xmin</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>xmax</key>
-      <value>255</value>
-    </param>
-    <param>
-      <key>nconnections</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>update_time</key>
-      <value>0.10</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value></value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(354, 544)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>180</value>
-    </param>
-  </block>
-  <block>
-    <key>qtgui_time_sink_x</key>
-    <param>
-      <key>id</key>
-      <value>qtgui_time_sink_x_0</value>
+      <value>digital_fll_band_edge_cc_0</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -568,79 +420,82 @@
     </param>
     <param>
       <key>type</key>
-      <value>float</value>
+      <value>cc</value>
     </param>
     <param>
-      <key>name</key>
-      <value>QT GUI Plot</value>
+      <key>samps_per_sym</key>
+      <value>samples_per_symbol</value>
     </param>
     <param>
-      <key>size</key>
-      <value>1024</value>
+      <key>rolloff</key>
+      <value>excess_bw</value>
     </param>
     <param>
-      <key>srate</key>
-      <value>samp_rate</value>
+      <key>filter_size</key>
+      <value>55</value>
     </param>
     <param>
-      <key>ymin</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>ymax</key>
-      <value>255</value>
-    </param>
-    <param>
-      <key>nconnections</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>update_time</key>
-      <value>0.10</value>
-    </param>
-    <param>
-      <key>tr_mode</key>
-      <value>qtgui.TRIG_MODE_FREE</value>
-    </param>
-    <param>
-      <key>tr_slope</key>
-      <value>qtgui.TRIG_SLOPE_POS</value>
-    </param>
-    <param>
-      <key>tr_level</key>
-      <value>0.0</value>
-    </param>
-    <param>
-      <key>tr_delay</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>tr_chan</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>tr_tag</key>
-      <value>""</value>
-    </param>
-    <param>
-      <key>entags</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value></value>
+      <key>w</key>
+      <value>freq_bw</value>
     </param>
     <param>
       <key>affinity</key>
       <value></value>
     </param>
     <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
       <key>_coordinate</key>
-      <value>(547, 501)</value>
+      <value>(212, 210)</value>
     </param>
     <param>
       <key>_rotation</key>
       <value>180</value>
+    </param>
+  </block>
+  <block>
+    <key>digital_costas_loop_cc</key>
+    <param>
+      <key>id</key>
+      <value>digital_costas_loop_cc_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>w</key>
+      <value>phase_bw</value>
+    </param>
+    <param>
+      <key>order</key>
+      <value>len(constellation.points())</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(466, 406)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
     </param>
   </block>
   <block>
@@ -795,7 +650,7 @@
     </param>
     <param>
       <key>gain0</key>
-      <value>10</value>
+      <value>0</value>
     </param>
     <param>
       <key>ant0</key>
@@ -1315,7 +1170,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(746, 219)</value>
+      <value>(751, 212)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1390,7 +1245,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(756, 100)</value>
+      <value>(776, 464)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -1398,82 +1253,149 @@
     </param>
   </block>
   <block>
-    <key>options</key>
+    <key>qtgui_histogram_sink_x</key>
     <param>
       <key>id</key>
-      <value>receiver</value>
+      <value>qtgui_histogram_sink_x_0</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>False</value>
     </param>
     <param>
-      <key>title</key>
-      <value></value>
+      <key>name</key>
+      <value>QT GUI Plot</value>
     </param>
     <param>
-      <key>author</key>
-      <value></value>
+      <key>size</key>
+      <value>1024</value>
     </param>
     <param>
-      <key>description</key>
-      <value></value>
+      <key>bins</key>
+      <value>255</value>
     </param>
     <param>
-      <key>window_size</key>
-      <value>1280, 1024</value>
-    </param>
-    <param>
-      <key>generate_options</key>
-      <value>qt_gui</value>
-    </param>
-    <param>
-      <key>category</key>
-      <value>Custom</value>
-    </param>
-    <param>
-      <key>run_options</key>
-      <value>prompt</value>
-    </param>
-    <param>
-      <key>run</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>max_nouts</key>
+      <key>xmin</key>
       <value>0</value>
     </param>
     <param>
-      <key>realtime_scheduling</key>
+      <key>xmax</key>
+      <value>255</value>
+    </param>
+    <param>
+      <key>nconnections</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>update_time</key>
+      <value>0.10</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
       <value></value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(10, 10)</value>
+      <value>(1004, 684)</value>
     </param>
     <param>
       <key>_rotation</key>
       <value>0</value>
     </param>
   </block>
-  <connection>
-    <source_block_id>blocks_uchar_to_float_0</source_block_id>
-    <sink_block_id>qtgui_histogram_sink_x_0</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>blocks_uchar_to_float_0</source_block_id>
-    <sink_block_id>qtgui_time_sink_x_0</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
-    <source_block_id>ldpc_ece535a_ldpc_decoder_cb_0</source_block_id>
-    <sink_block_id>blocks_uchar_to_float_0</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
+  <block>
+    <key>blocks_uchar_to_float</key>
+    <param>
+      <key>id</key>
+      <value>blocks_uchar_to_float_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>False</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(1048, 582)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>ldpc_ece535a_image_sink</key>
+    <param>
+      <key>id</key>
+      <value>ldpc_ece535a_image_sink_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(1126, 461)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>ldpc_ece535a_ldpc_decoder_cb</key>
+    <param>
+      <key>id</key>
+      <value>ldpc_ece535a_ldpc_decoder_cb_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>method</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(835, 390)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
   <connection>
     <source_block_id>digital_costas_loop_cc_0</source_block_id>
     <sink_block_id>ldpc_ece535a_ldpc_decoder_cb_0</sink_block_id>
@@ -1505,7 +1427,25 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>uhd_usrp_source_0</source_block_id>
+    <source_block_id>ldpc_ece535a_ldpc_decoder_cb_0</source_block_id>
+    <sink_block_id>ldpc_ece535a_image_sink_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>blocks_uchar_to_float_0</source_block_id>
+    <sink_block_id>qtgui_histogram_sink_x_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>ldpc_ece535a_ldpc_decoder_cb_0</source_block_id>
+    <sink_block_id>blocks_uchar_to_float_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>digital_costas_loop_cc_0</source_block_id>
     <sink_block_id>qtgui_sink_x_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
