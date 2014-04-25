@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<block>
+  <name>image_sink</name>
+  <key>ldpc_ece535a_image_sink</key>
+  <category>ldpc_ece535a</category>
+  <import>import ldpc_ece535a</import>
+  <make>ldpc_ece535a.image_sink()</make>
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+</block>

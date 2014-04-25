@@ -28,6 +28,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND ldpc_ece535a_sources
     ldpc_encoder_bc_impl.cc
     ldpc_decoder_cb_impl.cc
+    image_sink_impl.cc
 )
 
 set(ldpc_ece535a_sources "${ldpc_ece535a_sources}" PARENT_SCOPE)

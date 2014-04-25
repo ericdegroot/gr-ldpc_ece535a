@@ -19,5 +19,6 @@
 
 install(FILES
     ldpc_ece535a_ldpc_encoder_bc.xml
-    ldpc_ece535a_ldpc_decoder_cb.xml DESTINATION share/gnuradio/grc/blocks
+    ldpc_ece535a_ldpc_decoder_cb.xml
+    ldpc_ece535a_image_sink.xml DESTINATION share/gnuradio/grc/blocks
 )
