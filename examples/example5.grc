@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Mon Apr 21 22:33:44 2014</timestamp>
+  <timestamp>Fri Apr 25 00:06:42 2014</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -366,37 +366,6 @@
     <param>
       <key>_rotation</key>
       <value>180</value>
-    </param>
-  </block>
-  <block>
-    <key>ldpc_ece535a_ldpc_decoder_cb</key>
-    <param>
-      <key>id</key>
-      <value>ldpc_ece535a_ldpc_decoder_cb_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(647, 521)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
     </param>
   </block>
   <block>
@@ -804,6 +773,41 @@
     </param>
   </block>
   <block>
+    <key>ldpc_ece535a_ldpc_decoder_cb</key>
+    <param>
+      <key>id</key>
+      <value>ldpc_ece535a_ldpc_decoder_cb_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>method</key>
+      <value>3</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(647, 521)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
     <key>variable_qtgui_range</key>
     <param>
       <key>id</key>
@@ -819,7 +823,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>-4</value>
+      <value>-12</value>
     </param>
     <param>
       <key>start</key>

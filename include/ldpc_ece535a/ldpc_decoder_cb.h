@@ -32,7 +32,7 @@ namespace gr {
        * class. ldpc_ece535a::ldpc_decoder_cb::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(const int method);
     };
 
   } // namespace ldpc_ece535a

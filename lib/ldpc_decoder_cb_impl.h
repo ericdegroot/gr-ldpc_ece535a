@@ -22,6 +22,7 @@ namespace gr {
     class ldpc_decoder_cb_impl : public ldpc_decoder_cb
     {
      private:
+      int d_method;
       int d_state;
       unsigned int d_M;
       unsigned int d_N;
@@ -42,12 +43,16 @@ namespace gr {
       ublas::vector<int> decodeBitFlipping(const ublas::vector<double> &rx,
                                            const ublas::matrix<int> &H,
                                            const unsigned int iterations);
+      ublas::vector<int> decodeSumProductSoft(const ublas::vector<double> &rx,
+                                              const ublas::matrix<int> &H,
+                                              const unsigned int iterations);
+      ublas::vector<int> decodeHard(const ublas::vector<double> &rx);
 
       int sign(double val);
       ublas::vector<int> mod2(const ublas::vector<int> &u);
 
      public:
-      ldpc_decoder_cb_impl();
+      ldpc_decoder_cb_impl(const int method);
       ~ldpc_decoder_cb_impl();
 
       // Where all the action really happens
