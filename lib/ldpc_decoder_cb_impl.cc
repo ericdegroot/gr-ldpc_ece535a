@@ -37,7 +37,7 @@ namespace gr {
 		  gr::io_signature::make(1, 1, sizeof(gr_complex)),
                   gr::io_signature::make(1, 1, sizeof(unsigned char))),
         d_method(method), d_state(STATE_OUT_OF_SYNC), d_M(32), d_N(64), d_H(d_M, d_N),
-        d_iterations(5), d_uDist(1, d_M)
+        d_iterations(5), d_uDist(1, d_M), d_errors(0)
     {
       d_gen.seed(static_cast<unsigned int>(std::time(0)));
 
@@ -139,7 +139,7 @@ namespace gr {
       unsigned char *out = (unsigned char *) output_items[0];
 
       const int min_output_required = d_M / 8;
-      const int frame_error_threshold = d_M; //0.1 * d_M;
+      const int frame_error_threshold = 0.1 * d_M;
 
       int input_consumed = 0;
       int output_produced = 0;
@@ -164,38 +164,43 @@ namespace gr {
         }
 
         int sNotZero = checkFrame(vhat, frame_error_threshold);
-        //if (sNotZero > frame_error_threshold) {
-        if (sNotZero > 0) {
-          // Check if phase lock has flipped
-          vhat = decodeLogDomainSimple(-tx, d_H, d_iterations);
-          if ((sNotZero = checkFrame(vhat, 0)) == 0) {
-            if (d_state == STATE_IN_SYNC_INVERTED) {
-              std::cout << "PHASE RESTORED" << std::endl;
-              d_state = STATE_IN_SYNC;
-            } else {
-              std::cout << "PHASE INVERTED" << std::endl;
-              d_state = STATE_IN_SYNC_INVERTED;
-            }
-          } else {
-            if (d_state == STATE_IN_SYNC) {
-              std::cout << "STATE_OUT_OF_SYNC" << std::endl;
-              d_state = STATE_OUT_OF_SYNC;
-            }
 
-            // Skip ahead a random number of samples in search of the
-            // next frame
-            int skip = std::min(ninput_items[0] - input_consumed, d_uDist(d_gen));
-            in += skip;
-            input_consumed += skip;
+        if (sNotZero > frame_error_threshold) {
+          d_errors++;
+          if (d_errors > 100) {
+            d_errors = 0;
+            d_state = STATE_OUT_OF_SYNC;
+            std::cout << "MAX ERRORS; OUT OF SYNC" << std::endl;
           }
-        } 
 
-        if (sNotZero == 0) {
           if (d_state == STATE_OUT_OF_SYNC) {
-            std::cout << "STATE_IN_SYNC" << std::endl;
-            d_state = STATE_IN_SYNC;
-          }
+            if (d_method == 3) {
+              vhat = decodeHard(-tx);
+            } else if (d_method == 2) {
+              vhat = decodeBitFlipping(-tx, d_H, d_iterations);
+            } else if (d_method == 1) {
+              vhat = decodeSumProductSoft(-tx, d_H, d_iterations);
+            } else {
+              vhat = decodeLogDomainSimple(-tx, d_H, d_iterations);
+            }
 
+            if ((sNotZero = checkFrame(vhat, 0)) == 0) {
+              std::cout << "IN SYNC; PHASE INVERTED" << std::endl;
+              d_state = STATE_IN_SYNC_INVERTED;
+            } else {
+              // Skip ahead a random number of samples in search of the
+              // next frame
+              int skip = 1; //std::min(ninput_items[0] - input_consumed, d_uDist(d_gen));
+              in += skip;
+              input_consumed += skip;
+            }
+          }
+        } else if (d_state == STATE_OUT_OF_SYNC) {
+          std::cout << "IN SYNC" << std::endl;
+          d_state = STATE_IN_SYNC;
+        }
+
+        if (d_state == STATE_IN_SYNC) {
           // Send data bits to output byte stream
           for (int i = 0; i < min_output_required; i++) {
             *out = 0;

@@ -28,6 +28,7 @@ namespace gr {
       unsigned int d_N;
       ublas::matrix<int> d_H;
       unsigned int d_iterations;
+      unsigned int d_errors;
 
       boost::random::mt19937 d_gen;
       boost::random::uniform_int_distribution<> d_uDist;
