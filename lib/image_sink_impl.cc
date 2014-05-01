@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 namespace gr {
   namespace ldpc_ece535a {
@@ -29,8 +30,10 @@ namespace gr {
      */
     image_sink_impl::image_sink_impl()
       : gr::sync_block("image_sink",
-              gr::io_signature::make(1, 1, sizeof(unsigned char)),
-              gr::io_signature::make(0, 0, 0))
+                       gr::io_signature::make(1, 1, sizeof(unsigned char)),
+                       gr::io_signature::make(0, 0, 0)),
+        d_fileSize(0)
+
     {}
 
     /*
@@ -48,27 +51,29 @@ namespace gr {
         const unsigned char *in = (const unsigned char *) input_items[0];
 
         for (int i = 0; i < noutput_items; i++) {
-          /*
-          if (i < noutput_items - 14 && in[i] == 0x42 && in[i + 1] == 0x4D && in[i + 2] == 0x36 &&
-              in[i + 3] == 0x4C && in[i + 4] == 0x02 && in[i + 5] == 0x00 && in[i + 6] == 0x00 &&
-              in[i + 7] == 0x00 && in[i + 8] == 0x00 && in[i + 9] == 0x00 && in[i + 10] == 0x36 &&
-              in[i + 11] == 0x00 && in[i + 12] == 0x00 && in[i + 13] == 0x00) {
-          */
-          if (i < noutput_items - 4 && in[i] == 0x42 && in[i + 1] == 0x4D && in[i + 2] == 0x46 &&
-              in[i + 3] == 0x4B) {
-            std::cout << "Header Found" << std::endl;
-
-            if (d_buffer.length() > 0) {
+          // Look for BMP header
+          if (i < noutput_items - 18 && in[i] == 'B' && in[i + 1] == 'M' && in[i + 6] == 0
+              && in[i + 7] == 0 && in[i + 8] == 0 && in[i + 9] == 0
+              && (in[i + 14] == 12 || in[i + 14] == 40 || in[i + 14] == 52
+                  || in[i + 14] == 56 || in[i + 14] == 64 || in[i + 14] == 108
+                  || in[i + 14] == 124)) {
+            if (d_fileSize > 0 && d_buffer.length() >= d_fileSize) {
               std::ofstream file("result.bmp", std::ios::out | std::ios::binary);
               if (file.is_open()) {
-                file.write(d_buffer.data(), d_buffer.length());
+                file.write(d_buffer.data(), d_fileSize);
                 file.close();
 
                 std::cout << "File written" << std::endl;
-              }
 
-              d_buffer.erase();
+                std::system("/usr/bin/display result.bmp &");
+              }
             }
+
+            d_buffer.erase();
+
+            d_fileSize = (in[i + 5] << 24) | (in[i + 4] << 16) | (in[i + 3] << 8) | in[i + 2];
+
+            std::cout << "BMP Header Found: fileSize=" << d_fileSize << std::endl;
           }
 
           d_buffer.push_back(in[i]);

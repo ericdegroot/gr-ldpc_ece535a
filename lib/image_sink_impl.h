@@ -18,6 +18,7 @@ namespace gr {
     {
     private:
       std::string d_buffer;
+      unsigned int d_fileSize;
 
     public:
       image_sink_impl();
