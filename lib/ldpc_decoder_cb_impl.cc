@@ -139,7 +139,7 @@ namespace gr {
       unsigned char *out = (unsigned char *) output_items[0];
 
       const int min_output_required = d_M / 8;
-      const int frame_error_threshold = 0.1 * d_M;
+      const int frame_error_threshold = d_M / 8; // 12.5%
 
       int input_consumed = 0;
       int output_produced = 0;
@@ -166,11 +166,13 @@ namespace gr {
         int sNotZero = checkFrame(vhat, frame_error_threshold);
 
         if (sNotZero > frame_error_threshold) {
-          d_errors++;
-          if (d_errors > 100) {
-            d_errors = 0;
-            d_state = STATE_OUT_OF_SYNC;
-            std::cout << "MAX ERRORS; OUT OF SYNC" << std::endl;
+          if (d_state == STATE_IN_SYNC || d_state == STATE_IN_SYNC_INVERTED) {
+            d_errors++;
+            if (d_errors > 10) {
+              d_errors = 0;
+              d_state = STATE_OUT_OF_SYNC;
+              std::cout << "MAX ERRORS; OUT OF SYNC" << std::endl;
+            }
           }
 
           if (d_state == STATE_OUT_OF_SYNC) {
@@ -184,11 +186,12 @@ namespace gr {
               vhat = decodeLogDomainSimple(-tx, d_H, d_iterations);
             }
 
-            if ((sNotZero = checkFrame(vhat, 0)) == 0) {
+            if ((sNotZero = checkFrame(vhat, frame_error_threshold)) <= frame_error_threshold) {
               std::cout << "IN SYNC; PHASE INVERTED" << std::endl;
               d_state = STATE_IN_SYNC_INVERTED;
+              d_errors = 0;
             } else {
-              // Skip ahead a random number of samples in search of the
+              // Skip ahead a random number of symbols in search of the
               // next frame
               int skip = 1; //std::min(ninput_items[0] - input_consumed, d_uDist(d_gen));
               in += skip;
@@ -198,6 +201,7 @@ namespace gr {
         } else if (d_state == STATE_OUT_OF_SYNC) {
           std::cout << "IN SYNC" << std::endl;
           d_state = STATE_IN_SYNC;
+          d_errors = 0;
         }
 
         if (d_state == STATE_IN_SYNC || d_state == STATE_IN_SYNC_INVERTED) {

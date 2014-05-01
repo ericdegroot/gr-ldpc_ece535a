@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Wed Apr 30 19:15:16 2014</timestamp>
+  <timestamp>Wed Apr 30 23:16:40 2014</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -459,61 +459,6 @@
     </param>
   </block>
   <block>
-    <key>variable_qtgui_range</key>
-    <param>
-      <key>id</key>
-      <value>noise_dB</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>label</key>
-      <value>Noise Level (dB)</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>-12</value>
-    </param>
-    <param>
-      <key>start</key>
-      <value>-30</value>
-    </param>
-    <param>
-      <key>stop</key>
-      <value>30</value>
-    </param>
-    <param>
-      <key>step</key>
-      <value>.5</value>
-    </param>
-    <param>
-      <key>widget</key>
-      <value>counter_slider</value>
-    </param>
-    <param>
-      <key>orient</key>
-      <value>Qt.Horizontal</value>
-    </param>
-    <param>
-      <key>min_len</key>
-      <value>200</value>
-    </param>
-    <param>
-      <key>gui_hint</key>
-      <value></value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(524, 81)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
     <key>digital_pfb_clock_sync_xxx</key>
     <param>
       <key>id</key>
@@ -938,6 +883,61 @@
     <param>
       <key>_rotation</key>
       <value>180</value>
+    </param>
+  </block>
+  <block>
+    <key>variable_qtgui_range</key>
+    <param>
+      <key>id</key>
+      <value>noise_dB</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>label</key>
+      <value>Noise Level (dB)</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>-12</value>
+    </param>
+    <param>
+      <key>start</key>
+      <value>-30</value>
+    </param>
+    <param>
+      <key>stop</key>
+      <value>30</value>
+    </param>
+    <param>
+      <key>step</key>
+      <value>.5</value>
+    </param>
+    <param>
+      <key>widget</key>
+      <value>counter_slider</value>
+    </param>
+    <param>
+      <key>orient</key>
+      <value>Qt.Horizontal</value>
+    </param>
+    <param>
+      <key>min_len</key>
+      <value>200</value>
+    </param>
+    <param>
+      <key>gui_hint</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(524, 81)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
     </param>
   </block>
   <connection>
